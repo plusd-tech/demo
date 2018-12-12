@@ -45,6 +45,7 @@ contract('ProofOfInsurance', function(accounts) {
 				} catch (error) {
 					assert.match(error.message, /revert/);
 					assert.equal(await contract.carrier(), carrier);
+					assert.equal(await contract.state(), "CARRIER_ASSIGNED");
 				}
 			});
 		});
@@ -61,42 +62,73 @@ contract('ProofOfInsurance', function(accounts) {
 			it('Then the carrier should be updated', async () => {
 				assert.equal(await contract.carrier(), carrierAlternative);
 			});
-		});
 
-		describe('When the carrier assigns the insurer', () => {
-			beforeEach(async () => {
-				await contract.assignInsurer(insurer);
-			});
+			describe('When someone other than the carrier assigns an insurer', () => {
+				let result;
 
-			it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-				assert.equal(await contract.state(), "INSURER_ASSIGNED");
-			});
-
-			it('Then the insurer should be specified', async () => {
-				assert.equal(await contract.insurer(), insurer);
-			});
-
-			describe('When the consignor assigns a new carrier', () => {
 				beforeEach(async () => {
-					await contract.assignCarrier(carrierAlternative);
+					result = contract.assignInsurer(insurer, {
+						from: insurer,
+					});
 				});
 
-				it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-					assert.equal(await contract.state(), "CARRIER_ASSIGNED");
-				});
-
-				it('Then the carrier should be updated', async () => {
-					assert.equal(await contract.carrier(), carrierAlternative);
+				it('Then the insurer should not be assigned', async () => {
+					try {
+						await result;
+						assert.fail();
+					} catch (error) {
+						assert.match(error.message, /revert/);
+						assert.equal(await contract.insurer(), 0);
+						assert.equal(await contract.state(), "CARRIER_ASSIGNED");
+					}
 				});
 			});
 
-			describe('When the insurer verifies insurance', () => {
+			describe('When the carrier assigns the insurer', () => {
 				beforeEach(async () => {
-					await contract.verifyInsurance();
+					await contract.assignInsurer(insurer, {
+						from: carrierAlternative,
+					});
 				});
 
-				it('Then the contract should be in state "INSURANCE_VERIFIED"', async () => {
-					assert.equal(await contract.state(), "INSURANCE_VERIFIED");
+				it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
+					assert.equal(await contract.state(), "INSURER_ASSIGNED");
+				});
+
+				it('Then the insurer should be specified', async () => {
+					assert.equal(await contract.insurer(), insurer);
+				});
+
+				describe('When someone other than the insurer verifies the insurance', () => {
+					let result;
+
+					beforeEach(async () => {
+						result = contract.verifyInsurance({
+							from: carrierAlternative,
+						});
+					});
+
+					it('Then the insurer should not be verified', async () => {
+						try {
+							await result;
+							assert.fail();
+						} catch (error) {
+							assert.match(error.message, /revert/);
+							assert.equal(await contract.state(), "INSURER_ASSIGNED");
+						}
+					});
+				});
+
+				describe('When the insurer verifies insurance', () => {
+					beforeEach(async () => {
+						await contract.verifyInsurance({
+							from: insurer,
+						});
+					});
+
+					it('Then the contract should be in state "INSURANCE_VERIFIED"', async () => {
+						assert.equal(await contract.state(), "INSURANCE_VERIFIED");
+					});
 				});
 			});
 		});

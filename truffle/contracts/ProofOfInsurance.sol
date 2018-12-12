@@ -23,17 +23,27 @@ contract ProofOfInsurance {
 		_;
 	}
 
+	modifier onlyCarrier() {
+		require(msg.sender == carrier);
+		_;
+	}
+
+	modifier onlyInsurer() {
+		require(msg.sender == insurer);
+		_;
+	}
+
 	function assignCarrier(address _carrier) public onlyConsignor {
 		carrier = _carrier;
 		state = CARRIER_ASSIGNED;
 	}
 
-	function assignInsurer(address _insurer) public {
+	function assignInsurer(address _insurer) public onlyCarrier {
 		insurer = _insurer;
 		state = INSURER_ASSIGNED;
 	}
 
-	function verifyInsurance() public {
+	function verifyInsurance() public onlyInsurer {
 		state = INSURANCE_VERIFIED;
 	}
 }

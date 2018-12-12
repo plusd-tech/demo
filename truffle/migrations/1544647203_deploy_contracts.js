@@ -1,5 +1,7 @@
 const ProofOfInsurance = artifacts.require('./ProofOfInsurance');
 
-module.exports = async function(deployer) {
-	await deployer.deploy(ProofOfInsurance);
+const insuranceRequirements = "explosive goods";
+
+module.exports = async function(deployer, _, accounts) {
+	await deployer.deploy(ProofOfInsurance, accounts[1], insuranceRequirements);
 };

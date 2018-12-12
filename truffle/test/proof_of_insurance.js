@@ -1,7 +1,7 @@
 const ProofOfInsurance = artifacts.require('./ProofOfInsurance.sol');
 
 contract('ProofOfInsurance', function(accounts) {
-	const [consignor, carrier, insurer] = accounts;
+	const [consignor, carrier, insurer, carrierAlternative] = accounts;
 	let proofOfInsurance;
 
 	describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
@@ -29,6 +29,20 @@ contract('ProofOfInsurance', function(accounts) {
 			assert.equal(await proofOfInsurance.requirements(), "explosive goods");
 		});
 
+		describe('When the consignor assigns a new carrier', () => {
+			beforeEach(async () => {
+				await proofOfInsurance.assignCarrier(carrierAlternative);
+			});
+
+			it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
+				assert.equal(await proofOfInsurance.state(), "CARRIER_ASSIGNED");
+			});
+
+			it('Then the carrier should be updated', async () => {
+				assert.equal(await proofOfInsurance.carrier(), carrierAlternative);
+			});
+		});
+
 		describe('When the carrier assigns the insurer', () => {
 			beforeEach(async () => {
 				await proofOfInsurance.assignInsurer(insurer);
@@ -40,6 +54,20 @@ contract('ProofOfInsurance', function(accounts) {
 
 			it('Then the insurer should be specified', async () => {
 				assert.equal(await proofOfInsurance.insurer(), insurer);
+			});
+
+			describe('When the consignor assigns a new carrier', () => {
+				beforeEach(async () => {
+					await proofOfInsurance.assignCarrier(carrierAlternative);
+				});
+
+				it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
+					assert.equal(await proofOfInsurance.state(), "CARRIER_ASSIGNED");
+				});
+
+				it('Then the carrier should be updated', async () => {
+					assert.equal(await proofOfInsurance.carrier(), carrierAlternative);
+				});
 			});
 
 			describe('When the insurer verifies insurance', () => {

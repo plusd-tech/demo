@@ -14,9 +14,13 @@ contract ProofOfInsurance {
 
 	constructor(address _carrier, string _requirements) public {
 		consignor = msg.sender;
+		requirements = _requirements;
+		assignCarrier(_carrier);
+	}
+
+	function assignCarrier(address _carrier) public {
 		carrier = _carrier;
 		state = CARRIER_ASSIGNED;
-		requirements = _requirements;
 	}
 
 	function assignInsurer(address _insurer) public {

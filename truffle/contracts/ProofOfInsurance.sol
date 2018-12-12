@@ -18,7 +18,12 @@ contract ProofOfInsurance {
 		assignCarrier(_carrier);
 	}
 
-	function assignCarrier(address _carrier) public {
+	modifier onlyConsignor() {
+		require(msg.sender == consignor);
+		_;
+	}
+
+	function assignCarrier(address _carrier) public onlyConsignor {
 		carrier = _carrier;
 		state = CARRIER_ASSIGNED;
 	}

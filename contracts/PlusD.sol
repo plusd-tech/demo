@@ -1,6 +1,8 @@
 pragma solidity ^0.4.23;
 
-contract PlusD {
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
+contract PlusD is Ownable {
 	constructor() public {
 	}
 }

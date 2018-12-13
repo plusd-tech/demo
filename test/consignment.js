@@ -5,6 +5,7 @@ describe("Consignment", () => {
 	const INSURER_ASSIGNED = 0x01;
 	const INSURANCE_VERIFIED = 0x02;
 	const REQUIREMENTS_LENGTH = 32;
+	const ZERO_ADDRESS = 0;
 
 	contract("INIT => CARRIER_ASSIGNED", ([consignor, carrier]) => {
 		describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
@@ -31,7 +32,7 @@ describe("Consignment", () => {
 			});
 
 			it("Then the insurer should not be specified", async () => {
-				assert.equal(await consignment.insurer(), 0);
+				assert.equal(await consignment.insurer(), ZERO_ADDRESS);
 			});
 
 			it("Then the insurance requirements should be specified", async () => {
@@ -350,7 +351,7 @@ describe("Consignment", () => {
 							});
 
 							it("Then the insurer should be unassigned", async () => {
-								assert.equal(await consignment.insurer(), 0);
+								assert.equal(await consignment.insurer(), ZERO_ADDRESS);
 							});
 						});
 					});

@@ -1,3 +1,4 @@
+const util = require("util");
 const Consignment = artifacts.require("./Consignment.sol");
 
 describe("Consignment", () => {
@@ -73,8 +74,16 @@ describe("Consignment", () => {
 				});
 
 				describe("When the consignor assigns a new carrier", () => {
+					let eventsBefore;
+					let eventsAfter;
+
 					before(async () => {
+						const event = consignment.CarrierAssigned();
+						const getEvents = util.promisify(event.get.bind(event));
+
+						eventsBefore = await getEvents();
 						await consignment.assignCarrier(carrierAlternative);
+						eventsAfter = await getEvents();
 					});
 
 					it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
@@ -83,6 +92,13 @@ describe("Consignment", () => {
 
 					it("Then the carrier should be updated", async () => {
 						assert.equal(await consignment.carrier(), carrierAlternative);
+					});
+
+					it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
+						assert.equal(eventsAfter.length, eventsBefore.length + 1);
+						const eventCarrier =
+							eventsAfter[eventsAfter.length - 1].args.carrier;
+						assert.equal(eventCarrier, carrierAlternative);
 					});
 				});
 			});
@@ -118,10 +134,16 @@ describe("Consignment", () => {
 				});
 
 				describe("When the carrier assigns the insurer", () => {
+					let eventsBefore;
+					let eventsAfter;
+
 					before(async () => {
-						await consignment.assignInsurer(insurer, {
-							from: carrier,
-						});
+						const event = consignment.InsurerAssigned();
+						const getEvents = util.promisify(event.get.bind(event));
+
+						eventsBefore = await getEvents();
+						await consignment.assignInsurer(insurer, { from: carrier });
+						eventsAfter = await getEvents();
 					});
 
 					it("Then the contract should be in state INSURER_ASSIGNED", async () => {
@@ -130,6 +152,13 @@ describe("Consignment", () => {
 
 					it("Then the insurer should be specified", async () => {
 						assert.equal(await consignment.insurer(), insurer);
+					});
+
+					it("Then an INSURER_ASSIGNED event should be emitted specifying the insurer", async () => {
+						assert.equal(eventsAfter.length, eventsBefore.length + 1);
+						const eventInsurer =
+							eventsAfter[eventsAfter.length - 1].args.insurer;
+						assert.equal(eventInsurer, insurer);
 					});
 				});
 			});
@@ -172,8 +201,16 @@ describe("Consignment", () => {
 					});
 
 					describe("When the consignor assigns a new carrier", () => {
+						let eventsBefore;
+						let eventsAfter;
+
 						before(async () => {
+							const event = consignment.CarrierAssigned();
+							const getEvents = util.promisify(event.get.bind(event));
+
+							eventsBefore = await getEvents();
 							await consignment.assignCarrier(carrierAlternative);
+							eventsAfter = await getEvents();
 						});
 
 						it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
@@ -182,6 +219,13 @@ describe("Consignment", () => {
 
 						it("Then the carrier should be updated", async () => {
 							assert.equal(await consignment.carrier(), carrierAlternative);
+						});
+
+						it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
+							assert.equal(eventsAfter.length, eventsBefore.length + 1);
+							const eventCarrier =
+								eventsAfter[eventsAfter.length - 1].args.carrier;
+							assert.equal(eventCarrier, carrierAlternative);
 						});
 					});
 				});
@@ -225,10 +269,18 @@ describe("Consignment", () => {
 					});
 
 					describe("When the carrier assigns a new insurer", () => {
+						let eventsBefore;
+						let eventsAfter;
+
 						before(async () => {
+							const event = consignment.InsurerAssigned();
+							const getEvents = util.promisify(event.get.bind(event));
+
+							eventsBefore = await getEvents();
 							await consignment.assignInsurer(insurerAlternative, {
 								from: carrier,
 							});
+							eventsAfter = await getEvents();
 						});
 
 						it("Then the contract should be in state INSURER_ASSIGNED", async () => {
@@ -237,6 +289,13 @@ describe("Consignment", () => {
 
 						it("Then the insurer should be reassigned", async () => {
 							assert.equal(await consignment.insurer(), insurerAlternative);
+						});
+
+						it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
+							assert.equal(eventsAfter.length, eventsBefore.length + 1);
+							const eventInsurer =
+								eventsAfter[eventsAfter.length - 1].args.insurer;
+							assert.equal(eventInsurer, insurerAlternative);
 						});
 					});
 				});
@@ -280,14 +339,26 @@ describe("Consignment", () => {
 					});
 
 					describe("When the insurer verifies insurance", () => {
+						let eventsBefore;
+						let eventsAfter;
+
 						before(async () => {
+							const event = consignment.InsuranceVerified();
+							const getEvents = util.promisify(event.get.bind(event));
+
+							eventsBefore = await getEvents();
 							await consignment.verifyInsurance({
 								from: insurer,
 							});
+							eventsAfter = await getEvents();
 						});
 
 						it("Then the contract should be in state INSURANCE_VERIFIED", async () => {
 							assert.equal(await consignment.state(), INSURANCE_VERIFIED);
+						});
+
+						it("Then an INSURANCE_VERIFIED event should be emitted", async () => {
+							assert.equal(eventsAfter.length, eventsBefore.length + 1);
 						});
 					});
 				});
@@ -338,8 +409,16 @@ describe("Consignment", () => {
 						});
 
 						describe("When the consignor assigns a new carrier", () => {
+							let eventsBefore;
+							let eventsAfter;
+
 							before(async () => {
+								const event = consignment.CarrierAssigned();
+								const getEvents = util.promisify(event.get.bind(event));
+
+								eventsBefore = await getEvents();
 								await consignment.assignCarrier(carrierAlternative);
+								eventsAfter = await getEvents();
 							});
 
 							it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
@@ -352,6 +431,13 @@ describe("Consignment", () => {
 
 							it("Then the insurer should be unassigned", async () => {
 								assert.equal(await consignment.insurer(), ZERO_ADDRESS);
+							});
+
+							it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
+								assert.equal(eventsAfter.length, eventsBefore.length + 1);
+								const eventCarrier =
+									eventsAfter[eventsAfter.length - 1].args.carrier;
+								assert.equal(eventCarrier, carrierAlternative);
 							});
 						});
 					});
@@ -403,10 +489,18 @@ describe("Consignment", () => {
 						});
 
 						describe("When the carrier assigns a new insurer", () => {
+							let eventsBefore;
+							let eventsAfter;
+
 							before(async () => {
+								const event = consignment.InsurerAssigned();
+								const getEvents = util.promisify(event.get.bind(event));
+
+								eventsBefore = await getEvents();
 								await consignment.assignInsurer(insurerAlternative, {
 									from: carrier,
 								});
+								eventsAfter = await getEvents();
 							});
 
 							it("Then the contract should be in state INSURER_ASSIGNED", async () => {
@@ -415,6 +509,13 @@ describe("Consignment", () => {
 
 							it("Then the insurer should be reassigned", async () => {
 								assert.equal(await consignment.insurer(), insurerAlternative);
+							});
+
+							it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
+								assert.equal(eventsAfter.length, eventsBefore.length + 1);
+								const eventInsurer =
+									eventsAfter[eventsAfter.length - 1].args.insurer;
+								assert.equal(eventInsurer, insurerAlternative);
 							});
 						});
 					});

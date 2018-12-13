@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "dev": "npx truffle develop",
     "test": "npx truffle test"
   },
   "repository": {

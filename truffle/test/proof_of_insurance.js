@@ -4,9 +4,12 @@ describe('ProofOfInsurance', () => {
 	const CARRIER_ASSIGNED = 0x00;
 	const INSURER_ASSIGNED = 0x01;
 	const INSURANCE_VERIFIED = 0x02;
+	const REQUIREMENTS_LENGTH = 32;
 
 	contract('INIT => CARRIER_ASSIGNED', ([consignor, carrier]) => {
 		describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+			const requirements = 'explosive goods';
+			const normalisedRequirements = `${requirements}${Buffer.alloc(REQUIREMENTS_LENGTH - requirements.length)}`;
 			let contractPOI;
 
 			before(async () => {
@@ -30,7 +33,7 @@ describe('ProofOfInsurance', () => {
 			});
 
 			it('Then the insurance requirements should be specified', async () => {
-				assert.equal(await contractPOI.requirements(), "explosive goods");
+				assert.equal(await contractPOI.requirements(), web3.toHex(normalisedRequirements));
 			});
 		});
 	});

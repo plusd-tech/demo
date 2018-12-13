@@ -10,9 +10,9 @@ contract ProofOfInsurance {
 	address public consignor;
 	address public carrier;
 	address public insurer;
-	string public requirements;
+	bytes32 public requirements;
 
-	constructor(address _carrier, string _requirements) public {
+	constructor(address _carrier, bytes32 _requirements) public {
 		consignor = msg.sender;
 		requirements = _requirements;
 		assignCarrier(_carrier);

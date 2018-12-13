@@ -1,7 +1,7 @@
 pragma solidity ^0.4.22;
 
 
-contract ProofOfInsurance {
+contract Consignment {
 	uint8 private CARRIER_ASSIGNED = 0x00;
 	uint8 private INSURER_ASSIGNED = 0x01;
 	uint8 private INSURANCE_VERIFIED = 0x02;

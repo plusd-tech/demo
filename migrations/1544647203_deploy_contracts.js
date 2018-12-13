@@ -1,4 +1,4 @@
-const Consignment = artifacts.require('./Consignment');
+const Consignment = artifacts.require("./Consignment");
 
 const insuranceRequirements = "explosive goods";
 

@@ -11,6 +11,10 @@ contract Consignment {
 	address public insurer;
 	bytes32 public requirements;
 
+	event CarrierAssigned(address carrier);
+	event InsurerAssigned(address insurer);
+	event InsuranceVerified();
+
 	constructor(address _carrier, bytes32 _requirements) public {
 		consignor = msg.sender;
 		requirements = _requirements;
@@ -36,14 +40,17 @@ contract Consignment {
 		carrier = _carrier;
 		insurer = address(0);
 		state = CARRIER_ASSIGNED;
+		emit CarrierAssigned(carrier);
 	}
 
 	function assignInsurer(address _insurer) public onlyCarrier {
 		insurer = _insurer;
 		state = INSURER_ASSIGNED;
+		emit InsurerAssigned(insurer);
 	}
 
 	function verifyInsurance() public onlyInsurer {
 		state = INSURANCE_VERIFIED;
+		emit InsuranceVerified();
 	}
 }

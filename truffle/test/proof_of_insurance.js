@@ -53,13 +53,8 @@ describe('ProofOfInsurance', () => {
 					}
 				});
 
-				it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-					assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
-				});
-
-				it('Then the carrier should not be reassigned', async () => {
+				it('Then the transaction should not be successful', async () => {
 					assert.match(error.message, /revert/);
-					assert.equal(await contractPOI.carrier(), carrier);
 				});
 			});
 
@@ -101,13 +96,8 @@ describe('ProofOfInsurance', () => {
 					}
 				});
 
-				it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-					assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
-				});
-
-				it('Then the insurer should not be assigned', async () => {
+				it('Then the transaction should not be successful', async () => {
 					assert.match(error.message, /revert/);
-					assert.equal(await contractPOI.insurer(), 0);
 				});
 			});
 
@@ -159,17 +149,12 @@ describe('ProofOfInsurance', () => {
 						}
 					});
 
-					it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-						assert.equal(await contractPOI.state(), "INSURER_ASSIGNED");
-					});
-
-					it('Then the carrier should not be reassigned', async () => {
+					it('Then the transaction should not be successful', async () => {
 						assert.match(error.message, /revert/);
-						assert.equal(await contractPOI.carrier(), carrier);
 					});
 				});
 
-				contract('When the consignor assigns a new carrier', () => {
+				describe('When the consignor assigns a new carrier', () => {
 					before(async () => {
 						await contractPOI.assignCarrier(carrierAlternative);
 					});
@@ -215,13 +200,8 @@ describe('ProofOfInsurance', () => {
 						}
 					});
 
-					it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-						assert.equal(await contractPOI.state(), "INSURER_ASSIGNED");
-					});
-
-					it('Then the insurer should not be reassigned', async () => {
+					it('Then the transaction should not be successful', async () => {
 						assert.match(error.message, /revert/);
-						assert.equal(await contractPOI.insurer(), insurer);
 					});
 				});
 
@@ -274,11 +254,7 @@ describe('ProofOfInsurance', () => {
 						}
 					});
 
-					it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-						assert.equal(await contractPOI.state(), "INSURER_ASSIGNED");
-					});
-
-					it('Then the insurance should not be verified', async () => {
+					it('Then the transaction should not be successful', async () => {
 						assert.match(error.message, /revert/);
 					});
 				});
@@ -292,6 +268,69 @@ describe('ProofOfInsurance', () => {
 
 					it('Then the contract should be in state "INSURANCE_VERIFIED"', async () => {
 						assert.equal(await contractPOI.state(), "INSURANCE_VERIFIED");
+					});
+				});
+			});
+		});
+	});
+
+	contract('INSURANCE_VERIFIED => CARRIER_ASSIGNED', ([consignor, carrier, insurer, carrierAlternative]) => {
+		describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+			let contractPOI;
+
+			before(async () => {
+				contractPOI = await ProofOfInsurance.deployed();
+			});
+
+			describe('Given the carrier has assigned the insurer', () => {
+				before(async () => {
+					await contractPOI.assignInsurer(insurer, {
+						from: carrier,
+					});
+				});
+
+				describe('Given the insurer has verified the insurance', () => {
+					before(async () => {
+						await contractPOI.verifyInsurance({
+							from: insurer,
+						});
+					});
+
+					describe('When someone other than the consignor assigns a new carrier', () => {
+						let error
+						let result;
+
+						before(async () => {
+							try {
+								result = await contractPOI.assignCarrier(carrierAlternative, {
+									from: carrierAlternative,
+								});
+							} catch (err) {
+								error = err;
+							}
+						});
+
+						it('Then the transaction should not be successful', async () => {
+							assert.match(error.message, /revert/);
+						});
+					});
+
+					describe('When the consignor assigns a new carrier', () => {
+						before(async () => {
+							await contractPOI.assignCarrier(carrierAlternative);
+						});
+
+						it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
+							assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
+						});
+
+						it('Then the carrier should be updated', async () => {
+							assert.equal(await contractPOI.carrier(), carrierAlternative);
+						});
+
+						it('Then the insurer should be unassigned', async () => {
+							assert.equal(await contractPOI.insurer(), 0);
+						});
 					});
 				});
 			});

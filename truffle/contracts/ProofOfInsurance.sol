@@ -35,6 +35,7 @@ contract ProofOfInsurance {
 
 	function assignCarrier(address _carrier) public onlyConsignor {
 		carrier = _carrier;
+		insurer = address(0);
 		state = CARRIER_ASSIGNED;
 	}
 

@@ -1,6 +1,10 @@
 const ProofOfInsurance = artifacts.require('./ProofOfInsurance.sol');
 
 describe('ProofOfInsurance', () => {
+	const CARRIER_ASSIGNED = 0x00;
+	const INSURER_ASSIGNED = 0x01;
+	const INSURANCE_VERIFIED = 0x02;
+
 	contract('INIT => CARRIER_ASSIGNED', ([consignor, carrier]) => {
 		describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 			let contractPOI;
@@ -9,8 +13,8 @@ describe('ProofOfInsurance', () => {
 				contractPOI = await ProofOfInsurance.deployed();
 			});
 
-			it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-				assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
+			it('Then the contract should be in state CARRIER_ASSIGNED', async () => {
+				assert.equal(await contractPOI.state(), CARRIER_ASSIGNED);
 			});
 
 			it('Then the consignor should be specified', async () => {
@@ -63,8 +67,8 @@ describe('ProofOfInsurance', () => {
 					await contractPOI.assignCarrier(carrierAlternative);
 				});
 
-				it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-					assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
+				it('Then the contract should be in state CARRIER_ASSIGNED', async () => {
+					assert.equal(await contractPOI.state(), CARRIER_ASSIGNED);
 				});
 
 				it('Then the carrier should be updated', async () => {
@@ -109,8 +113,8 @@ describe('ProofOfInsurance', () => {
 					});
 				});
 
-				it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-					assert.equal(await contractPOI.state(), "INSURER_ASSIGNED");
+				it('Then the contract should be in state INSURER_ASSIGNED', async () => {
+					assert.equal(await contractPOI.state(), INSURER_ASSIGNED);
 				});
 
 				it('Then the insurer should be specified', async () => {
@@ -159,8 +163,8 @@ describe('ProofOfInsurance', () => {
 						await contractPOI.assignCarrier(carrierAlternative);
 					});
 
-					it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-						assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
+					it('Then the contract should be in state CARRIER_ASSIGNED', async () => {
+						assert.equal(await contractPOI.state(), CARRIER_ASSIGNED);
 					});
 
 					it('Then the carrier should be updated', async () => {
@@ -213,8 +217,8 @@ describe('ProofOfInsurance', () => {
 						});
 					});
 
-					it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-						assert.equal(await contractPOI.state(), "INSURER_ASSIGNED");
+					it('Then the contract should be in state INSURER_ASSIGNED', async () => {
+						assert.equal(await contractPOI.state(), INSURER_ASSIGNED);
 					});
 
 					it('Then the insurer should be reassigned', async () => {
@@ -266,8 +270,8 @@ describe('ProofOfInsurance', () => {
 						});
 					});
 
-					it('Then the contract should be in state "INSURANCE_VERIFIED"', async () => {
-						assert.equal(await contractPOI.state(), "INSURANCE_VERIFIED");
+					it('Then the contract should be in state INSURANCE_VERIFIED', async () => {
+						assert.equal(await contractPOI.state(), INSURANCE_VERIFIED);
 					});
 				});
 			});
@@ -320,8 +324,8 @@ describe('ProofOfInsurance', () => {
 							await contractPOI.assignCarrier(carrierAlternative);
 						});
 
-						it('Then the contract should be in state "CARRIER_ASSIGNED"', async () => {
-							assert.equal(await contractPOI.state(), "CARRIER_ASSIGNED");
+						it('Then the contract should be in state CARRIER_ASSIGNED', async () => {
+							assert.equal(await contractPOI.state(), CARRIER_ASSIGNED);
 						});
 
 						it('Then the carrier should be updated', async () => {
@@ -386,8 +390,8 @@ describe('ProofOfInsurance', () => {
 							});
 						});
 
-						it('Then the contract should be in state "INSURER_ASSIGNED"', async () => {
-							assert.equal(await contractPOI.state(), "INSURER_ASSIGNED");
+						it('Then the contract should be in state INSURER_ASSIGNED', async () => {
+							assert.equal(await contractPOI.state(), INSURER_ASSIGNED);
 						});
 
 						it('Then the insurer should be reassigned', async () => {

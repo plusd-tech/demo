@@ -2,11 +2,11 @@ pragma solidity ^0.4.22;
 
 
 contract ProofOfInsurance {
-	string private CARRIER_ASSIGNED = "CARRIER_ASSIGNED";
-	string private INSURER_ASSIGNED = "INSURER_ASSIGNED";
-	string private INSURANCE_VERIFIED = "INSURANCE_VERIFIED";
+	uint8 private CARRIER_ASSIGNED = 0x00;
+	uint8 private INSURER_ASSIGNED = 0x01;
+	uint8 private INSURANCE_VERIFIED = 0x02;
 
-	string public state;
+	uint8 public state;
 	address public consignor;
 	address public carrier;
 	address public insurer;

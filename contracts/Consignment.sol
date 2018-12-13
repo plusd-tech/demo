@@ -1,6 +1,5 @@
 pragma solidity ^0.4.22;
 
-
 contract Consignment {
 	uint8 private CARRIER_ASSIGNED = 0x00;
 	uint8 private INSURER_ASSIGNED = 0x01;

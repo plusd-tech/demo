@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "npx truffle develop",
+    "format": "npx prettier --write **/*.js",
     "test": "npx truffle test"
   },
   "repository": {

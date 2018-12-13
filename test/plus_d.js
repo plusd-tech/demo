@@ -92,4 +92,43 @@ describe("PlusD", () => {
 			});
 		});
 	});
+
+	contract('Register insurer', ([owner, insurer]) => {
+		describe('Given the owner has initialised the contract', () => {
+			const companyRegistrationNumber = '27814';
+			let plusD;
+
+			before(async () => {
+				plusD = await PlusD.deployed();
+			});
+
+			describe("When someone other than the owner registers a insurer", () => {
+				let error;
+
+				before(async () => {
+					try {
+						await plusD.registerInsurer(insurer, companyRegistrationNumber, {
+							from: insurer,
+						});
+					} catch (err) {
+						error = err;
+					}
+				});
+
+				it("Then the transaction should not be successful", async () => {
+					assert.match(error.message, /revert/);
+				});
+			});
+
+			describe('When the owner registers a insurer using its address and company registration number', () => {
+				before(async () => {
+					await plusD.registerInsurer(insurer, companyRegistrationNumber);
+				});
+
+				it('Then the insurer should be registered under the company registration number', async () => {
+					assert.strictEqual(await plusD.insurers(companyRegistrationNumber), insurer);
+				});
+			});
+		});
+	});
 });

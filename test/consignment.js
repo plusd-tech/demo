@@ -57,9 +57,6 @@ describe('Consignment', () => {
 					} catch (err) {
 						error = err;
 					}
-					if (!error) {
-						assert.fail(null, null, 'New carrier was assigned by someone other than the consignor');
-					}
 				});
 
 				it('Then the transaction should not be successful', async () => {
@@ -101,9 +98,6 @@ describe('Consignment', () => {
 						});
 					} catch (err) {
 						error = err;
-					}
-					if (!error) {
-						assert.fail(null, null, 'Insurer was assigned by someone other than the carrier');
 					}
 				});
 
@@ -157,9 +151,6 @@ describe('Consignment', () => {
 						} catch (err) {
 							error = err;
 						}
-						if (!error) {
-							assert.fail(null, null, 'New carrier was assigned by someone other than the consignor');
-						}
 					});
 
 					it('Then the transaction should not be successful', async () => {
@@ -209,9 +200,6 @@ describe('Consignment', () => {
 							});
 						} catch (err) {
 							error = err;
-						}
-						if (!error) {
-							assert.fail(null, null, 'New insurer was assigned by someone other than the carrier');
 						}
 					});
 
@@ -265,9 +253,6 @@ describe('Consignment', () => {
 							});
 						} catch (err) {
 							error = err;
-						}
-						if (!error) {
-							assert.fail(null, null, 'Insurance was verified by someone other than the insurer');
 						}
 					});
 
@@ -323,9 +308,6 @@ describe('Consignment', () => {
 								});
 							} catch (err) {
 								error = err;
-							}
-							if (!error) {
-								assert.fail(null, null, 'New carrier was assigned by someone other than the consignor');
 							}
 						});
 
@@ -388,9 +370,6 @@ describe('Consignment', () => {
 								});
 							} catch (err) {
 								error = err;
-							}
-							if (!error) {
-								assert.fail(null, null, 'New insurer was assigned by someone other than the carrier');
 							}
 						});
 

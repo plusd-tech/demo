@@ -53,4 +53,43 @@ describe("PlusD", () => {
 			});
 		});
 	});
+
+	contract('Register carrier', ([owner, carrier]) => {
+		describe('Given the owner has initialised the contract', () => {
+			const companyRegistrationNumber = '27814';
+			let plusD;
+
+			before(async () => {
+				plusD = await PlusD.deployed();
+			});
+
+			describe("When someone other than the owner registers a carrier", () => {
+				let error;
+
+				before(async () => {
+					try {
+						await plusD.registerCarrier(carrier, companyRegistrationNumber, {
+							from: carrier,
+						});
+					} catch (err) {
+						error = err;
+					}
+				});
+
+				it("Then the transaction should not be successful", async () => {
+					assert.match(error.message, /revert/);
+				});
+			});
+
+			describe('When the owner registers a carrier using its address and company registration number', () => {
+				before(async () => {
+					await plusD.registerCarrier(carrier, companyRegistrationNumber);
+				});
+
+				it('Then the carrier should be registered under the company registration number', async () => {
+					assert.strictEqual(await plusD.carriers(companyRegistrationNumber), carrier);
+				});
+			});
+		});
+	});
 });

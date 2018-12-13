@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/plusd-tech/demo#readme",
   "devDependencies": {
+    "prettier": "^1.15.3",
     "truffle": "^4.1.14"
   }
 }

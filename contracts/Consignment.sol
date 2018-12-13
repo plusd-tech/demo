@@ -1,4 +1,4 @@
-pragma solidity ^0.4.22;
+pragma solidity ^0.4.23;
 
 contract Consignment {
 	uint8 private CARRIER_ASSIGNED = 0x00;

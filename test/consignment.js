@@ -6,7 +6,7 @@ describe("Consignment", () => {
 	const INSURER_ASSIGNED = 0x01;
 	const INSURANCE_VERIFIED = 0x02;
 	const REQUIREMENTS_LENGTH = 32;
-	const ZERO_ADDRESS = 0;
+	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 	contract("INIT => CARRIER_ASSIGNED", ([consignor, carrier]) => {
 		describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
@@ -21,23 +21,23 @@ describe("Consignment", () => {
 			});
 
 			it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-				assert.equal(await consignment.state(), CARRIER_ASSIGNED);
+				assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
 			});
 
 			it("Then the consignor should be specified", async () => {
-				assert.equal(await consignment.consignor(), consignor);
+				assert.strictEqual(await consignment.consignor(), consignor);
 			});
 
 			it("Then the carrier should be specified", async () => {
-				assert.equal(await consignment.carrier(), carrier);
+				assert.strictEqual(await consignment.carrier(), carrier);
 			});
 
 			it("Then the insurer should not be specified", async () => {
-				assert.equal(await consignment.insurer(), ZERO_ADDRESS);
+				assert.strictEqual(await consignment.insurer(), ZERO_ADDRESS);
 			});
 
 			it("Then the insurance requirements should be specified", async () => {
-				assert.equal(
+				assert.strictEqual(
 					await consignment.requirements(),
 					web3.toHex(normalisedRequirements),
 				);
@@ -87,18 +87,18 @@ describe("Consignment", () => {
 					});
 
 					it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-						assert.equal(await consignment.state(), CARRIER_ASSIGNED);
+						assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
 					});
 
 					it("Then the carrier should be updated", async () => {
-						assert.equal(await consignment.carrier(), carrierAlternative);
+						assert.strictEqual(await consignment.carrier(), carrierAlternative);
 					});
 
 					it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
-						assert.equal(eventsAfter.length, eventsBefore.length + 1);
+						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 						const eventCarrier =
 							eventsAfter[eventsAfter.length - 1].args.carrier;
-						assert.equal(eventCarrier, carrierAlternative);
+						assert.strictEqual(eventCarrier, carrierAlternative);
 					});
 				});
 			});
@@ -147,18 +147,18 @@ describe("Consignment", () => {
 					});
 
 					it("Then the contract should be in state INSURER_ASSIGNED", async () => {
-						assert.equal(await consignment.state(), INSURER_ASSIGNED);
+						assert.strictEqual(parseInt(await consignment.state(), 10), INSURER_ASSIGNED);
 					});
 
 					it("Then the insurer should be specified", async () => {
-						assert.equal(await consignment.insurer(), insurer);
+						assert.strictEqual(await consignment.insurer(), insurer);
 					});
 
 					it("Then an INSURER_ASSIGNED event should be emitted specifying the insurer", async () => {
-						assert.equal(eventsAfter.length, eventsBefore.length + 1);
+						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 						const eventInsurer =
 							eventsAfter[eventsAfter.length - 1].args.insurer;
-						assert.equal(eventInsurer, insurer);
+						assert.strictEqual(eventInsurer, insurer);
 					});
 				});
 			});
@@ -214,18 +214,18 @@ describe("Consignment", () => {
 						});
 
 						it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-							assert.equal(await consignment.state(), CARRIER_ASSIGNED);
+							assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
 						});
 
 						it("Then the carrier should be updated", async () => {
-							assert.equal(await consignment.carrier(), carrierAlternative);
+							assert.strictEqual(await consignment.carrier(), carrierAlternative);
 						});
 
 						it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
-							assert.equal(eventsAfter.length, eventsBefore.length + 1);
+							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 							const eventCarrier =
 								eventsAfter[eventsAfter.length - 1].args.carrier;
-							assert.equal(eventCarrier, carrierAlternative);
+							assert.strictEqual(eventCarrier, carrierAlternative);
 						});
 					});
 				});
@@ -284,18 +284,18 @@ describe("Consignment", () => {
 						});
 
 						it("Then the contract should be in state INSURER_ASSIGNED", async () => {
-							assert.equal(await consignment.state(), INSURER_ASSIGNED);
+							assert.strictEqual(parseInt(await consignment.state(), 10), INSURER_ASSIGNED);
 						});
 
 						it("Then the insurer should be reassigned", async () => {
-							assert.equal(await consignment.insurer(), insurerAlternative);
+							assert.strictEqual(await consignment.insurer(), insurerAlternative);
 						});
 
 						it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
-							assert.equal(eventsAfter.length, eventsBefore.length + 1);
+							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 							const eventInsurer =
 								eventsAfter[eventsAfter.length - 1].args.insurer;
-							assert.equal(eventInsurer, insurerAlternative);
+							assert.strictEqual(eventInsurer, insurerAlternative);
 						});
 					});
 				});
@@ -354,11 +354,11 @@ describe("Consignment", () => {
 						});
 
 						it("Then the contract should be in state INSURANCE_VERIFIED", async () => {
-							assert.equal(await consignment.state(), INSURANCE_VERIFIED);
+							assert.strictEqual(parseInt(await consignment.state(), 10), INSURANCE_VERIFIED);
 						});
 
 						it("Then an INSURANCE_VERIFIED event should be emitted", async () => {
-							assert.equal(eventsAfter.length, eventsBefore.length + 1);
+							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 						});
 					});
 				});
@@ -422,22 +422,22 @@ describe("Consignment", () => {
 							});
 
 							it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-								assert.equal(await consignment.state(), CARRIER_ASSIGNED);
+								assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
 							});
 
 							it("Then the carrier should be updated", async () => {
-								assert.equal(await consignment.carrier(), carrierAlternative);
+								assert.strictEqual(await consignment.carrier(), carrierAlternative);
 							});
 
 							it("Then the insurer should be unassigned", async () => {
-								assert.equal(await consignment.insurer(), ZERO_ADDRESS);
+								assert.strictEqual(await consignment.insurer(), ZERO_ADDRESS);
 							});
 
 							it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
-								assert.equal(eventsAfter.length, eventsBefore.length + 1);
+								assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 								const eventCarrier =
 									eventsAfter[eventsAfter.length - 1].args.carrier;
-								assert.equal(eventCarrier, carrierAlternative);
+								assert.strictEqual(eventCarrier, carrierAlternative);
 							});
 						});
 					});
@@ -504,18 +504,18 @@ describe("Consignment", () => {
 							});
 
 							it("Then the contract should be in state INSURER_ASSIGNED", async () => {
-								assert.equal(await consignment.state(), INSURER_ASSIGNED);
+								assert.strictEqual(parseInt(await consignment.state(), 10), INSURER_ASSIGNED);
 							});
 
 							it("Then the insurer should be reassigned", async () => {
-								assert.equal(await consignment.insurer(), insurerAlternative);
+								assert.strictEqual(await consignment.insurer(), insurerAlternative);
 							});
 
 							it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
-								assert.equal(eventsAfter.length, eventsBefore.length + 1);
+								assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 								const eventInsurer =
 									eventsAfter[eventsAfter.length - 1].args.insurer;
-								assert.equal(eventInsurer, insurerAlternative);
+								assert.strictEqual(eventInsurer, insurerAlternative);
 							});
 						});
 					});

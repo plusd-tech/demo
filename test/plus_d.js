@@ -17,15 +17,32 @@ describe("PlusD", () => {
 
 	contract('Register consignor', ([owner, consignor]) => {
 		describe('Given the owner has initialised the contract', () => {
+			const companyRegistrationNumber = '27814';
 			let plusD;
 
 			before(async () => {
 				plusD = await PlusD.deployed();
 			});
 
-			describe('When the owner registers a consignor using its address and company registration number', () => {
-				const companyRegistrationNumber = '27814';
+			describe("When someone other than the owner registers a consignor", () => {
+				let error;
 
+				before(async () => {
+					try {
+						await plusD.registerConsignor(consignor, companyRegistrationNumber, {
+							from: consignor,
+						});
+					} catch (err) {
+						error = err;
+					}
+				});
+
+				it("Then the transaction should not be successful", async () => {
+					assert.match(error.message, /revert/);
+				});
+			});
+
+			describe('When the owner registers a consignor using its address and company registration number', () => {
 				before(async () => {
 					await plusD.registerConsignor(consignor, companyRegistrationNumber);
 				});

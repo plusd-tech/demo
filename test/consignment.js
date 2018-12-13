@@ -47,16 +47,18 @@ describe('Consignment', () => {
 			});
 
 			describe('When someone other than the consignor assigns a new carrier', () => {
-				let error
-				let result;
+				let error;
 
 				before(async () => {
 					try {
-						result = await consignment.assignCarrier(carrierAlternative, {
+						await consignment.assignCarrier(carrierAlternative, {
 							from: carrierAlternative,
 						});
 					} catch (err) {
 						error = err;
+					}
+					if (!error) {
+						assert.fail(null, null, 'New carrier was assigned by someone other than the consignor');
 					}
 				});
 
@@ -91,15 +93,17 @@ describe('Consignment', () => {
 
 			describe('When someone other than the carrier assigns an insurer', () => {
 				let error;
-				let result;
 
 				before(async () => {
 					try {
-						result = await consignment.assignInsurer(insurer, {
+						await consignment.assignInsurer(insurer, {
 							from: insurer,
 						});
 					} catch (err) {
 						error = err;
+					}
+					if (!error) {
+						assert.fail(null, null, 'Insurer was assigned by someone other than the carrier');
 					}
 				});
 
@@ -144,15 +148,17 @@ describe('Consignment', () => {
 
 				describe('When someone other than the consignor assigns a new carrier', () => {
 					let error
-					let result;
 
 					before(async () => {
 						try {
-							result = await consignment.assignCarrier(carrierAlternative, {
+							await consignment.assignCarrier(carrierAlternative, {
 								from: carrierAlternative,
 							});
 						} catch (err) {
 							error = err;
+						}
+						if (!error) {
+							assert.fail(null, null, 'New carrier was assigned by someone other than the consignor');
 						}
 					});
 
@@ -195,15 +201,17 @@ describe('Consignment', () => {
 
 				describe('When someone other than the carrier assigns a new insurer', () => {
 					let error;
-					let result;
 
 					before(async () => {
 						try {
-							result = await consignment.assignInsurer(insurerAlternative, {
+							await consignment.assignInsurer(insurerAlternative, {
 								from: insurer,
 							});
 						} catch (err) {
 							error = err;
+						}
+						if (!error) {
+							assert.fail(null, null, 'New insurer was assigned by someone other than the carrier');
 						}
 					});
 
@@ -249,15 +257,17 @@ describe('Consignment', () => {
 
 				describe('When someone other than the insurer verifies the insurance', () => {
 					let error;
-					let result;
 
 					before(async () => {
 						try {
-							result = await consignment.verifyInsurance({
+							await consignment.verifyInsurance({
 								from: carrier,
 							});
 						} catch (err) {
 							error = err;
+						}
+						if (!error) {
+							assert.fail(null, null, 'Insurance was verified by someone other than the insurer');
 						}
 					});
 
@@ -305,15 +315,17 @@ describe('Consignment', () => {
 
 					describe('When someone other than the consignor assigns a new carrier', () => {
 						let error
-						let result;
 
 						before(async () => {
 							try {
-								result = await consignment.assignCarrier(carrierAlternative, {
+								await consignment.assignCarrier(carrierAlternative, {
 									from: carrierAlternative,
 								});
 							} catch (err) {
 								error = err;
+							}
+							if (!error) {
+								assert.fail(null, null, 'New carrier was assigned by someone other than the consignor');
 							}
 						});
 
@@ -368,15 +380,17 @@ describe('Consignment', () => {
 
 					describe('When someone other than the carrier assigns a new insurer', () => {
 						let error;
-						let result;
 
 						before(async () => {
 							try {
-								result = await consignment.assignInsurer(insurerAlternative, {
+								await consignment.assignInsurer(insurerAlternative, {
 									from: insurer,
 								});
 							} catch (err) {
 								error = err;
+							}
+							if (!error) {
+								assert.fail(null, null, 'New insurer was assigned by someone other than the carrier');
 							}
 						});
 

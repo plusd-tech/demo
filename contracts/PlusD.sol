@@ -12,6 +12,7 @@ contract PlusD is Ownable {
 	event ConsignorRegistered(address consignor, bytes32 companyRegistrationNumber);
 	event CarrierRegistered(address carrier, bytes32 companyRegistrationNumber);
 	event InsurerRegistered(address insurer, bytes32 companyRegistrationNumber);
+	event ConsignmentCreated(address consignment);
 
 	function registerConsignor(address _consignor, bytes32 _companyRegistrationNumber) public onlyOwner {
 		consignors[_companyRegistrationNumber] = _consignor;
@@ -31,5 +32,6 @@ contract PlusD is Ownable {
 	function createConsignment(address _carrier, bytes32 _requirements) public {
 		Consignment consignment = new Consignment(msg.sender, _carrier, _requirements);
 		consignments[msg.sender].push(consignment);
+		emit ConsignmentCreated(consignment);
 	}
 }

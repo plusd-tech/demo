@@ -244,14 +244,21 @@ describe("PlusD", () => {
 
 				describe("When the consignor creates a consigment specifying the carrier and requirements 'explosive goods'", () => {
 					let consignment;
+					let eventsBefore;
+					let eventsAfter;
 
 					before(async () => {
+						const event = plusD.ConsignmentCreated();
+						const getEvents = util.promisify(event.get.bind(event));
+
+						eventsBefore = await getEvents();
 						await plusD.createConsignment(carrier, requirements, {
 							from: consignor,
 						});
 						consignment = new Consignment(
 							await plusD.consignments(consignor, 0),
 						);
+						eventsAfter = await getEvents();
 					});
 
 					it("Then the consignment should be in state CARRIER_ASSIGNED", async () => {
@@ -274,6 +281,14 @@ describe("PlusD", () => {
 							await consignment.requirements(),
 							normaliseBytes32(requirements),
 						);
+					});
+
+					it("Then a CONSIGNMENT_CREATED event should be emitted specifying the consignor and ", async () => {
+						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
+						const { consignment: eventConsignment } = eventsAfter[
+							eventsAfter.length - 1
+						].args;
+						assert.strictEqual(eventConsignment, consignment.address);
 					});
 				});
 			});

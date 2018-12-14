@@ -1,10 +1,11 @@
-const util = require("util");
+const {
+	attemptUnsuccessfulTransaction,
+	getEventsForTransaction,
+	normaliseBytes32,
+} = require("./utils");
 
 const PlusD = artifacts.require("./PlusD.sol");
 const Consignment = artifacts.require("./Consignment.sol");
-
-const normaliseBytes32 = str =>
-	web3.toHex(`${str}${Buffer.alloc(32 - str.length)}`);
 
 describe("PlusD", () => {
 	const CARRIER_ASSIGNED = 0x01;
@@ -36,17 +37,16 @@ describe("PlusD", () => {
 				let error;
 
 				before(async () => {
-					try {
-						await plusD.registerConsignor(
-							consignor,
-							companyRegistrationNumber,
-							{
-								from: consignor,
-							},
-						);
-					} catch (err) {
-						error = err;
-					}
+					error = await attemptUnsuccessfulTransaction(
+						async () =>
+							await plusD.registerConsignor(
+								consignor,
+								companyRegistrationNumber,
+								{
+									from: consignor,
+								},
+							),
+					);
 				});
 
 				it("Then the transaction should not be successful", async () => {
@@ -59,12 +59,14 @@ describe("PlusD", () => {
 				let eventsAfter;
 
 				before(async () => {
-					const event = plusD.ConsignorRegistered();
-					const getEvents = util.promisify(event.get.bind(event));
-
-					eventsBefore = await getEvents();
-					await plusD.registerConsignor(consignor, companyRegistrationNumber);
-					eventsAfter = await getEvents();
+					[eventsBefore, eventsAfter] = await getEventsForTransaction(
+						async () =>
+							await plusD.registerConsignor(
+								consignor,
+								companyRegistrationNumber,
+							),
+						plusD.ConsignorRegistered,
+					);
 				});
 
 				it("Then the consignor should be registered with the company registration number", async () => {
@@ -103,13 +105,12 @@ describe("PlusD", () => {
 				let error;
 
 				before(async () => {
-					try {
-						await plusD.registerCarrier(carrier, companyRegistrationNumber, {
-							from: carrier,
-						});
-					} catch (err) {
-						error = err;
-					}
+					error = await attemptUnsuccessfulTransaction(
+						async () =>
+							await plusD.registerCarrier(carrier, companyRegistrationNumber, {
+								from: carrier,
+							}),
+					);
 				});
 
 				it("Then the transaction should not be successful", async () => {
@@ -122,12 +123,11 @@ describe("PlusD", () => {
 				let eventsAfter;
 
 				before(async () => {
-					const event = plusD.CarrierRegistered();
-					const getEvents = util.promisify(event.get.bind(event));
-
-					eventsBefore = await getEvents();
-					await plusD.registerCarrier(carrier, companyRegistrationNumber);
-					eventsAfter = await getEvents();
+					[eventsBefore, eventsAfter] = await getEventsForTransaction(
+						async () =>
+							await plusD.registerCarrier(carrier, companyRegistrationNumber),
+						plusD.CarrierRegistered,
+					);
 				});
 
 				it("Then the carrier should be registered with the company registration number", async () => {
@@ -166,13 +166,12 @@ describe("PlusD", () => {
 				let error;
 
 				before(async () => {
-					try {
-						await plusD.registerInsurer(insurer, companyRegistrationNumber, {
-							from: insurer,
-						});
-					} catch (err) {
-						error = err;
-					}
+					error = await attemptUnsuccessfulTransaction(
+						async () =>
+							await plusD.registerInsurer(insurer, companyRegistrationNumber, {
+								from: insurer,
+							}),
+					);
 				});
 
 				it("Then the transaction should not be successful", async () => {
@@ -185,12 +184,11 @@ describe("PlusD", () => {
 				let eventsAfter;
 
 				before(async () => {
-					const event = plusD.InsurerRegistered();
-					const getEvents = util.promisify(event.get.bind(event));
-
-					eventsBefore = await getEvents();
-					await plusD.registerInsurer(insurer, companyRegistrationNumber);
-					eventsAfter = await getEvents();
+					[eventsBefore, eventsAfter] = await getEventsForTransaction(
+						async () =>
+							await plusD.registerInsurer(insurer, companyRegistrationNumber),
+						plusD.InsurerRegistered,
+					);
 				});
 
 				it("Then the insurer should be registered with the company registration number", async () => {
@@ -217,8 +215,6 @@ describe("PlusD", () => {
 	});
 
 	contract("Consignment creation", ([owner, consignor, carrier]) => {
-		const consignorCompanyRegistrationNumber = "HRB 27814";
-		const carrierCompanyRegistrationNumber = "HRB 28806";
 		const requirements = "explosive goods";
 		let plusD;
 
@@ -227,6 +223,8 @@ describe("PlusD", () => {
 		});
 
 		describe("Given a consignor has been registered with company registration number 'HRB 27814'", () => {
+			const consignorCompanyRegistrationNumber = "HRB 27814";
+
 			before(async () => {
 				await plusD.registerConsignor(
 					consignor,
@@ -235,6 +233,8 @@ describe("PlusD", () => {
 			});
 
 			describe("Given a carrier has been registered with company registration number 'HRB 28806'", () => {
+				const carrierCompanyRegistrationNumber = "HRB 28806";
+
 				before(async () => {
 					await plusD.registerCarrier(
 						carrier,
@@ -246,13 +246,12 @@ describe("PlusD", () => {
 					let error;
 
 					before(async () => {
-						try {
-							await plusD.createConsignment(carrier, requirements, {
-								from: carrier,
-							});
-						} catch (err) {
-							error = err;
-						}
+						error = await attemptUnsuccessfulTransaction(
+							async () =>
+								await plusD.createConsignment(carrier, requirements, {
+									from: carrier,
+								}),
+						);
 					});
 
 					it("Then the transaction should not be successful", async () => {
@@ -266,17 +265,17 @@ describe("PlusD", () => {
 					let eventsAfter;
 
 					before(async () => {
-						const event = plusD.ConsignmentCreated();
-						const getEvents = util.promisify(event.get.bind(event));
-
-						eventsBefore = await getEvents();
-						await plusD.createConsignment(carrier, requirements, {
-							from: consignor,
-						});
-						consignment = new Consignment(
-							await plusD.consignments(consignor, 0),
+						[eventsBefore, eventsAfter] = await getEventsForTransaction(
+							async () => {
+								await plusD.createConsignment(carrier, requirements, {
+									from: consignor,
+								});
+								consignment = new Consignment(
+									await plusD.consignments(consignor, 0),
+								);
+							},
+							plusD.ConsignmentCreated,
 						);
-						eventsAfter = await getEvents();
 					});
 
 					it("Then the consignment should be in state CARRIER_ASSIGNED", async () => {

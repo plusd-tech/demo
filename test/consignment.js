@@ -1,4 +1,8 @@
-const util = require("util");
+const {
+	attemptUnsuccessfulTransaction,
+	getEventsForTransaction,
+	normaliseBytes32,
+} = require("./utils");
 
 const Consignment = artifacts.require("./Consignment.sol");
 
@@ -13,9 +17,7 @@ describe("Consignment", () => {
 	contract("UNINITIALISED => CARRIER_ASSIGNED", ([_, consignor, carrier]) => {
 		describe('Given the contract has been initialised with the consignor, the carrier and insurance requirements "explosive goods"', () => {
 			const requirements = "explosive goods";
-			const normalisedRequirements = `${requirements}${Buffer.alloc(
-				REQUIREMENTS_LENGTH - requirements.length,
-			)}`;
+			const normalisedRequirements = normaliseBytes32(requirements);
 			let consignment;
 
 			before(async () => {
@@ -64,13 +66,12 @@ describe("Consignment", () => {
 					let error;
 
 					before(async () => {
-						try {
-							await consignment.assignCarrier(carrierAlternative, {
-								from: carrierAlternative,
-							});
-						} catch (err) {
-							error = err;
-						}
+						error = await attemptUnsuccessfulTransaction(
+							async () =>
+								await consignment.assignCarrier(carrierAlternative, {
+									from: carrierAlternative,
+								}),
+						);
 					});
 
 					it("Then the transaction should not be successful", async () => {
@@ -83,14 +84,13 @@ describe("Consignment", () => {
 					let eventsAfter;
 
 					before(async () => {
-						const event = consignment.CarrierAssigned();
-						const getEvents = util.promisify(event.get.bind(event));
-
-						eventsBefore = await getEvents();
-						await consignment.assignCarrier(carrierAlternative, {
-							from: consignor,
-						});
-						eventsAfter = await getEvents();
+						[eventsBefore, eventsAfter] = await getEventsForTransaction(
+							async () =>
+								await consignment.assignCarrier(carrierAlternative, {
+									from: consignor,
+								}),
+							consignment.CarrierAssigned,
+						);
 					});
 
 					it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
@@ -129,13 +129,12 @@ describe("Consignment", () => {
 					let error;
 
 					before(async () => {
-						try {
-							await consignment.assignInsurer(insurer, {
-								from: insurer,
-							});
-						} catch (err) {
-							error = err;
-						}
+						error = await attemptUnsuccessfulTransaction(
+							async () =>
+								await consignment.assignInsurer(insurer, {
+									from: insurer,
+								}),
+						);
 					});
 
 					it("Then the transaction should not be successful", async () => {
@@ -148,12 +147,11 @@ describe("Consignment", () => {
 					let eventsAfter;
 
 					before(async () => {
-						const event = consignment.InsurerAssigned();
-						const getEvents = util.promisify(event.get.bind(event));
-
-						eventsBefore = await getEvents();
-						await consignment.assignInsurer(insurer, { from: carrier });
-						eventsAfter = await getEvents();
+						[eventsBefore, eventsAfter] = await getEventsForTransaction(
+							async () =>
+								await consignment.assignInsurer(insurer, { from: carrier }),
+							consignment.InsurerAssigned,
+						);
 					});
 
 					it("Then the contract should be in state INSURER_ASSIGNED", async () => {
@@ -199,13 +197,12 @@ describe("Consignment", () => {
 						let error;
 
 						before(async () => {
-							try {
-								await consignment.assignCarrier(carrierAlternative, {
-									from: carrierAlternative,
-								});
-							} catch (err) {
-								error = err;
-							}
+							error = await attemptUnsuccessfulTransaction(
+								async () =>
+									await consignment.assignCarrier(carrierAlternative, {
+										from: carrierAlternative,
+									}),
+							);
 						});
 
 						it("Then the transaction should not be successful", async () => {
@@ -218,14 +215,13 @@ describe("Consignment", () => {
 						let eventsAfter;
 
 						before(async () => {
-							const event = consignment.CarrierAssigned();
-							const getEvents = util.promisify(event.get.bind(event));
-
-							eventsBefore = await getEvents();
-							await consignment.assignCarrier(carrierAlternative, {
-								from: consignor,
-							});
-							eventsAfter = await getEvents();
+							[eventsBefore, eventsAfter] = await getEventsForTransaction(
+								async () =>
+									await consignment.assignCarrier(carrierAlternative, {
+										from: consignor,
+									}),
+								consignment.CarrierAssigned,
+							);
 						});
 
 						it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
@@ -282,13 +278,12 @@ describe("Consignment", () => {
 						let error;
 
 						before(async () => {
-							try {
-								await consignment.assignInsurer(insurerAlternative, {
-									from: insurer,
-								});
-							} catch (err) {
-								error = err;
-							}
+							error = await attemptUnsuccessfulTransaction(
+								async () =>
+									await consignment.assignInsurer(insurerAlternative, {
+										from: insurer,
+									}),
+							);
 						});
 
 						it("Then the transaction should not be successful", async () => {
@@ -301,14 +296,13 @@ describe("Consignment", () => {
 						let eventsAfter;
 
 						before(async () => {
-							const event = consignment.InsurerAssigned();
-							const getEvents = util.promisify(event.get.bind(event));
-
-							eventsBefore = await getEvents();
-							await consignment.assignInsurer(insurerAlternative, {
-								from: carrier,
-							});
-							eventsAfter = await getEvents();
+							[eventsBefore, eventsAfter] = await getEventsForTransaction(
+								async () =>
+									await consignment.assignInsurer(insurerAlternative, {
+										from: carrier,
+									}),
+								consignment.InsurerAssigned,
+							);
 						});
 
 						it("Then the contract should be in state INSURER_ASSIGNED", async () => {
@@ -358,13 +352,12 @@ describe("Consignment", () => {
 						let error;
 
 						before(async () => {
-							try {
-								await consignment.verifyInsurance({
-									from: carrier,
-								});
-							} catch (err) {
-								error = err;
-							}
+							error = await attemptUnsuccessfulTransaction(
+								async () =>
+									await consignment.verifyInsurance({
+										from: carrier,
+									}),
+							);
 						});
 
 						it("Then the transaction should not be successful", async () => {
@@ -377,14 +370,13 @@ describe("Consignment", () => {
 						let eventsAfter;
 
 						before(async () => {
-							const event = consignment.InsuranceVerified();
-							const getEvents = util.promisify(event.get.bind(event));
-
-							eventsBefore = await getEvents();
-							await consignment.verifyInsurance({
-								from: insurer,
-							});
-							eventsAfter = await getEvents();
+							[eventsBefore, eventsAfter] = await getEventsForTransaction(
+								async () =>
+									await consignment.verifyInsurance({
+										from: insurer,
+									}),
+								consignment.InsuranceVerified,
+							);
 						});
 
 						it("Then the contract should be in state INSURANCE_VERIFIED", async () => {
@@ -431,13 +423,12 @@ describe("Consignment", () => {
 							let error;
 
 							before(async () => {
-								try {
-									await consignment.assignCarrier(carrierAlternative, {
-										from: carrierAlternative,
-									});
-								} catch (err) {
-									error = err;
-								}
+								error = await attemptUnsuccessfulTransaction(
+									async () =>
+										await consignment.assignCarrier(carrierAlternative, {
+											from: carrierAlternative,
+										}),
+								);
 							});
 
 							it("Then the transaction should not be successful", async () => {
@@ -450,14 +441,13 @@ describe("Consignment", () => {
 							let eventsAfter;
 
 							before(async () => {
-								const event = consignment.CarrierAssigned();
-								const getEvents = util.promisify(event.get.bind(event));
-
-								eventsBefore = await getEvents();
-								await consignment.assignCarrier(carrierAlternative, {
-									from: consignor,
-								});
-								eventsAfter = await getEvents();
+								[eventsBefore, eventsAfter] = await getEventsForTransaction(
+									async () =>
+										await consignment.assignCarrier(carrierAlternative, {
+											from: consignor,
+										}),
+									consignment.CarrierAssigned,
+								);
 							});
 
 							it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
@@ -526,13 +516,12 @@ describe("Consignment", () => {
 							let error;
 
 							before(async () => {
-								try {
-									await consignment.assignInsurer(insurerAlternative, {
-										from: insurer,
-									});
-								} catch (err) {
-									error = err;
-								}
+								error = await attemptUnsuccessfulTransaction(
+									async () =>
+										await consignment.assignInsurer(insurerAlternative, {
+											from: insurer,
+										}),
+								);
 							});
 
 							it("Then the transaction should not be successful", async () => {
@@ -545,14 +534,13 @@ describe("Consignment", () => {
 							let eventsAfter;
 
 							before(async () => {
-								const event = consignment.InsurerAssigned();
-								const getEvents = util.promisify(event.get.bind(event));
-
-								eventsBefore = await getEvents();
-								await consignment.assignInsurer(insurerAlternative, {
-									from: carrier,
-								});
-								eventsAfter = await getEvents();
+								[eventsBefore, eventsAfter] = await getEventsForTransaction(
+									async () =>
+										await consignment.assignInsurer(insurerAlternative, {
+											from: carrier,
+										}),
+									consignment.InsurerAssigned,
+								);
 							});
 
 							it("Then the contract should be in state INSURER_ASSIGNED", async () => {

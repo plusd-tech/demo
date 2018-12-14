@@ -5,12 +5,13 @@ contract Consignment {
 	uint8 private CARRIER_ASSIGNED = 0x01;
 	uint8 private INSURER_ASSIGNED = 0x02;
 	uint8 private INSURANCE_VERIFIED = 0x03;
-
 	uint8 public state = UNINITIALISED;
+
 	address public deployer;
 	address public consignor;
 	address public carrier;
 	address public insurer;
+
 	bytes32 public requirements;
 
 	event CarrierAssigned(address carrier);

@@ -10,7 +10,7 @@ const Consignment = artifacts.require("./Consignment.sol");
 describe("PlusD", () => {
 	const CARRIER_ASSIGNED = 0x01;
 
-	contract("INIT", ([owner]) => {
+	contract("Initialise contract", ([owner]) => {
 		describe("Given the owner has initialised the contract", () => {
 			let plusD;
 

@@ -1,11 +1,12 @@
 pragma solidity ^0.4.23;
 
 contract Consignment {
-	uint8 private CARRIER_ASSIGNED = 0x00;
-	uint8 private INSURER_ASSIGNED = 0x01;
-	uint8 private INSURANCE_VERIFIED = 0x02;
+	uint8 private UNINITIALISED = 0x00;
+	uint8 private CARRIER_ASSIGNED = 0x01;
+	uint8 private INSURER_ASSIGNED = 0x02;
+	uint8 private INSURANCE_VERIFIED = 0x03;
 
-	uint8 public state;
+	uint8 public state = UNINITIALISED;
 	address public consignor;
 	address public carrier;
 	address public insurer;
@@ -15,14 +16,16 @@ contract Consignment {
 	event InsurerAssigned(address insurer);
 	event InsuranceVerified();
 
-	constructor(address _carrier, bytes32 _requirements) public {
-		consignor = msg.sender;
+	constructor(address _consignor, address _carrier, bytes32 _requirements) public {
+		consignor = _consignor;
 		requirements = _requirements;
 		assignCarrier(_carrier);
 	}
 
 	modifier onlyConsignor() {
-		require(msg.sender == consignor);
+		if (state != UNINITIALISED) {
+			require(msg.sender == consignor);
+		}
 		_;
 	}
 

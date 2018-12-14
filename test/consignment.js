@@ -1,15 +1,17 @@
 const util = require("util");
+
 const Consignment = artifacts.require("./Consignment.sol");
 
 describe("Consignment", () => {
-	const CARRIER_ASSIGNED = 0x00;
-	const INSURER_ASSIGNED = 0x01;
-	const INSURANCE_VERIFIED = 0x02;
+	const UNINITIALISED = 0x00;
+	const CARRIER_ASSIGNED = 0x01;
+	const INSURER_ASSIGNED = 0x02;
+	const INSURANCE_VERIFIED = 0x03;
 	const REQUIREMENTS_LENGTH = 32;
 	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-	contract("INIT => CARRIER_ASSIGNED", ([consignor, carrier]) => {
-		describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+	contract("UNINITIALISED => CARRIER_ASSIGNED", ([_, consignor, carrier]) => {
+		describe('Given the contract has been initialised with the consignor, the carrier and insurance requirements "explosive goods"', () => {
 			const requirements = "explosive goods";
 			const normalisedRequirements = `${requirements}${Buffer.alloc(
 				REQUIREMENTS_LENGTH - requirements.length,
@@ -50,7 +52,7 @@ describe("Consignment", () => {
 
 	contract(
 		"CARRIER_ASSIGNED => CARRIER_ASSIGNED",
-		([consignor, carrier, insurer, carrierAlternative]) => {
+		([_, consignor, carrier, insurer, carrierAlternative]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 
@@ -85,7 +87,9 @@ describe("Consignment", () => {
 						const getEvents = util.promisify(event.get.bind(event));
 
 						eventsBefore = await getEvents();
-						await consignment.assignCarrier(carrierAlternative);
+						await consignment.assignCarrier(carrierAlternative, {
+							from: consignor,
+						});
 						eventsAfter = await getEvents();
 					});
 
@@ -113,7 +117,7 @@ describe("Consignment", () => {
 
 	contract(
 		"CARRIER_ASSIGNED => INSURER_ASSIGNED",
-		([consignor, carrier, insurer, carrierAlternative]) => {
+		([_, consignor, carrier, insurer, carrierAlternative]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 
@@ -176,7 +180,7 @@ describe("Consignment", () => {
 
 	contract(
 		"INSURER_ASSIGNED => CARRIER_ASSIGNED",
-		([consignor, carrier, insurer, carrierAlternative]) => {
+		([_, consignor, carrier, insurer, carrierAlternative]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 
@@ -218,7 +222,9 @@ describe("Consignment", () => {
 							const getEvents = util.promisify(event.get.bind(event));
 
 							eventsBefore = await getEvents();
-							await consignment.assignCarrier(carrierAlternative);
+							await consignment.assignCarrier(carrierAlternative, {
+								from: consignor,
+							});
 							eventsAfter = await getEvents();
 						});
 
@@ -250,7 +256,14 @@ describe("Consignment", () => {
 
 	contract(
 		"INSURER_ASSIGNED => INSURER_ASSIGNED",
-		([consignor, carrier, insurer, carrierAlternative, insurerAlternative]) => {
+		([
+			_,
+			consignor,
+			carrier,
+			insurer,
+			carrierAlternative,
+			insurerAlternative,
+		]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 
@@ -326,7 +339,7 @@ describe("Consignment", () => {
 
 	contract(
 		"INSURER_ASSIGNED => INSURANCE_VERIFIED",
-		([consignor, carrier, insurer]) => {
+		([_, consignor, carrier, insurer]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 
@@ -392,7 +405,7 @@ describe("Consignment", () => {
 
 	contract(
 		"INSURANCE_VERIFIED => CARRIER_ASSIGNED",
-		([consignor, carrier, insurer, carrierAlternative]) => {
+		([_, consignor, carrier, insurer, carrierAlternative]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 
@@ -441,7 +454,9 @@ describe("Consignment", () => {
 								const getEvents = util.promisify(event.get.bind(event));
 
 								eventsBefore = await getEvents();
-								await consignment.assignCarrier(carrierAlternative);
+								await consignment.assignCarrier(carrierAlternative, {
+									from: consignor,
+								});
 								eventsAfter = await getEvents();
 							});
 
@@ -478,7 +493,14 @@ describe("Consignment", () => {
 
 	contract(
 		"INSURANCE_VERIFIED => INSURER_ASSIGNED",
-		([consignor, carrier, insurer, carrierAlternative, insurerAlternative]) => {
+		([
+			_,
+			consignor,
+			carrier,
+			insurer,
+			carrierAlternative,
+			insurerAlternative,
+		]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
 				let consignment;
 

@@ -8,6 +8,7 @@ contract PlusD is Ownable {
 	mapping (bytes32 => address) public insurers;
 
 	event ConsignorRegistered(address consignor, bytes32 companyRegistrationNumber);
+	event CarrierRegistered(address carrier, bytes32 companyRegistrationNumber);
 
 	function registerConsignor(address _consignor, bytes32 _companyRegistrationNumber) public onlyOwner {
 		consignors[_companyRegistrationNumber] = _consignor;
@@ -16,6 +17,7 @@ contract PlusD is Ownable {
 
 	function registerCarrier(address _carrier, bytes32 _companyRegistrationNumber) public onlyOwner {
 		carriers[_companyRegistrationNumber] = _carrier;
+		emit CarrierRegistered(_carrier, _companyRegistrationNumber);
 	}
 
 	function registerInsurer(address _insurer, bytes32 _companyRegistrationNumber) public onlyOwner {

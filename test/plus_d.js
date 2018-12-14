@@ -178,14 +178,35 @@ describe("PlusD", () => {
 			});
 
 			describe("When the owner registers a insurer using its address and company registration number", () => {
+				let eventsBefore;
+				let eventsAfter;
+
 				before(async () => {
+					const event = plusD.InsurerRegistered();
+					const getEvents = util.promisify(event.get.bind(event));
+
+					eventsBefore = await getEvents();
 					await plusD.registerInsurer(insurer, companyRegistrationNumber);
+					eventsAfter = await getEvents();
 				});
 
 				it("Then the insurer should be registered under the company registration number", async () => {
 					assert.strictEqual(
 						await plusD.insurers(companyRegistrationNumber),
 						insurer,
+					);
+				});
+
+				it("Then an INSURER_REGISTERED event should be emitted specifying the new carrier address and company registration number", async () => {
+					assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
+					const {
+						insurer: eventInsurer,
+						companyRegistrationNumber: eventCompanyRegistrationNumber,
+					} = eventsAfter[eventsAfter.length - 1].args;
+					assert.strictEqual(eventInsurer, insurer);
+					assert.strictEqual(
+						eventCompanyRegistrationNumber,
+						normaliseBytes32(companyRegistrationNumber),
 					);
 				});
 			});

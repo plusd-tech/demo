@@ -67,10 +67,10 @@ describe("PlusD", () => {
 					eventsAfter = await getEvents();
 				});
 
-				it("Then the consignor should be registered under the company registration number", async () => {
+				it("Then the consignor should be registered with the company registration number", async () => {
 					assert.strictEqual(
-						await plusD.consignors(companyRegistrationNumber),
-						consignor,
+						await plusD.consignors(consignor),
+						normaliseBytes32(companyRegistrationNumber),
 					);
 				});
 
@@ -130,10 +130,10 @@ describe("PlusD", () => {
 					eventsAfter = await getEvents();
 				});
 
-				it("Then the carrier should be registered under the company registration number", async () => {
+				it("Then the carrier should be registered with the company registration number", async () => {
 					assert.strictEqual(
-						await plusD.carriers(companyRegistrationNumber),
-						carrier,
+						await plusD.carriers(carrier),
+						normaliseBytes32(companyRegistrationNumber),
 					);
 				});
 
@@ -193,10 +193,10 @@ describe("PlusD", () => {
 					eventsAfter = await getEvents();
 				});
 
-				it("Then the insurer should be registered under the company registration number", async () => {
+				it("Then the insurer should be registered with the company registration number", async () => {
 					assert.strictEqual(
-						await plusD.insurers(companyRegistrationNumber),
-						insurer,
+						await plusD.insurers(insurer),
+						normaliseBytes32(companyRegistrationNumber),
 					);
 				});
 
@@ -240,6 +240,24 @@ describe("PlusD", () => {
 						carrier,
 						carrierCompanyRegistrationNumber,
 					);
+				});
+
+				describe("When someone other than a consignor creates a consignment", () => {
+					let error;
+
+					before(async () => {
+						try {
+							await plusD.createConsignment(carrier, requirements, {
+								from: carrier,
+							});
+						} catch (err) {
+							error = err;
+						}
+					});
+
+					it("Then the transaction should not be successful", async () => {
+						assert.match(error.message, /revert/);
+					});
 				});
 
 				describe("When the consignor creates a consigment specifying the carrier and requirements 'explosive goods'", () => {

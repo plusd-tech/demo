@@ -102,12 +102,28 @@ describe("PlusD", () => {
 			});
 
 			describe('When the owner registers a carrier using its address and company registration number', () => {
+				let eventsBefore;
+				let eventsAfter;
+
 				before(async () => {
+					const event = plusD.CarrierRegistered();
+					const getEvents = util.promisify(event.get.bind(event));
+
+					eventsBefore = await getEvents();
 					await plusD.registerCarrier(carrier, companyRegistrationNumber);
+					eventsAfter = await getEvents();
 				});
 
 				it('Then the carrier should be registered under the company registration number', async () => {
 					assert.strictEqual(await plusD.carriers(companyRegistrationNumber), carrier);
+				});
+
+				it("Then a CARRIER_REGISTERED event should be emitted specifying the new carrier address and company registration number", async () => {
+					assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
+					const { carrier: eventCarrier, companyRegistrationNumber: eventCompanyRegistrationNumber } =
+						eventsAfter[eventsAfter.length - 1].args;
+					assert.strictEqual(eventCarrier, carrier);
+					assert.strictEqual(eventCompanyRegistrationNumber, normaliseBytes32(companyRegistrationNumber));
 				});
 			});
 		});

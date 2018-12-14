@@ -1,11 +1,14 @@
 const util = require("util");
 
 const PlusD = artifacts.require("./PlusD.sol");
+const Consignment = artifacts.require("./Consignment.sol");
 
 const normaliseBytes32 = str =>
 	web3.toHex(`${str}${Buffer.alloc(32 - str.length)}`);
 
 describe("PlusD", () => {
+	const CARRIER_ASSIGNED = 0x00;
+
 	contract("INIT", ([owner]) => {
 		describe("Given the owner has initialised the contract", () => {
 			let plusD;
@@ -208,6 +211,70 @@ describe("PlusD", () => {
 						eventCompanyRegistrationNumber,
 						normaliseBytes32(companyRegistrationNumber),
 					);
+				});
+			});
+		});
+	});
+
+	contract("Consignment creation", ([owner, consignor, carrier]) => {
+		const consignorCompanyRegistrationNumber = "HRB 27814";
+		const carrierCompanyRegistrationNumber = "HRB 28806";
+		const requirements = "explosive goods";
+		let plusD;
+
+		before(async () => {
+			plusD = await PlusD.deployed();
+		});
+
+		describe("Given a consignor has been registered with company registration number 'HRB 27814'", () => {
+			before(async () => {
+				await plusD.registerConsignor(
+					consignor,
+					consignorCompanyRegistrationNumber,
+				);
+			});
+
+			describe("Given a carrier has been registered with company registration number 'HRB 28806'", () => {
+				before(async () => {
+					await plusD.registerCarrier(
+						carrier,
+						carrierCompanyRegistrationNumber,
+					);
+				});
+
+				describe("When the consignor creates a consigment specifying the carrier and requirements 'explosive goods'", () => {
+					let consignment;
+
+					before(async () => {
+						await plusD.createConsignment(carrier, requirements, {
+							from: consignor,
+						});
+						consignment = new Consignment(
+							await plusD.consignments(consignor, 0),
+						);
+					});
+
+					it("Then the consignment should be in state CARRIER_ASSIGNED", async () => {
+						assert.strictEqual(
+							parseInt(await consignment.state(), 10),
+							CARRIER_ASSIGNED,
+						);
+					});
+
+					it("Then the consignment should specify the consignor", async () => {
+						assert.strictEqual(await consignment.consignor(), consignor);
+					});
+
+					it("Then the consignment should specify the carrier", async () => {
+						assert.strictEqual(await consignment.carrier(), carrier);
+					});
+
+					it("Then the consignment should specify the requirements", async () => {
+						assert.strictEqual(
+							await consignment.requirements(),
+							normaliseBytes32(requirements),
+						);
+					});
 				});
 			});
 		});

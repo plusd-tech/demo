@@ -7,7 +7,7 @@ const normaliseBytes32 = str =>
 	web3.toHex(`${str}${Buffer.alloc(32 - str.length)}`);
 
 describe("PlusD", () => {
-	const CARRIER_ASSIGNED = 0x00;
+	const CARRIER_ASSIGNED = 0x01;
 
 	contract("INIT", ([owner]) => {
 		describe("Given the owner has initialised the contract", () => {

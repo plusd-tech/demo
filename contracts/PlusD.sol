@@ -29,7 +29,7 @@ contract PlusD is Ownable {
 	}
 
 	function createConsignment(address _carrier, bytes32 _requirements) public {
-		Consignment consignment = new Consignment(_carrier, _requirements);
+		Consignment consignment = new Consignment(msg.sender, _carrier, _requirements);
 		consignments[msg.sender].push(consignment);
 	}
 }

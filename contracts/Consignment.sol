@@ -7,6 +7,7 @@ contract Consignment {
 	uint8 private INSURANCE_VERIFIED = 0x03;
 
 	uint8 public state = UNINITIALISED;
+	address public deployer;
 	address public consignor;
 	address public carrier;
 	address public insurer;
@@ -17,13 +18,16 @@ contract Consignment {
 	event InsuranceVerified();
 
 	constructor(address _consignor, address _carrier, bytes32 _requirements) public {
+		deployer = msg.sender;
 		consignor = _consignor;
 		requirements = _requirements;
 		assignCarrier(_carrier);
 	}
 
 	modifier onlyConsignor() {
-		if (state != UNINITIALISED) {
+		if (state == UNINITIALISED) {
+			require(msg.sender == deployer);
+		} else {
 			require(msg.sender == consignor);
 		}
 		_;

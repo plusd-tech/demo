@@ -1,4 +1,8 @@
+const util = require('util');
+
 const PlusD = artifacts.require("./PlusD.sol");
+
+const normaliseBytes32 = str => web3.toHex(`${str}${Buffer.alloc(32 - str.length)}`);
 
 describe("PlusD", () => {
 	contract("INIT", ([owner]) => {
@@ -17,7 +21,7 @@ describe("PlusD", () => {
 
 	contract('Register consignor', ([owner, consignor]) => {
 		describe('Given the owner has initialised the contract', () => {
-			const companyRegistrationNumber = '27814';
+			const companyRegistrationNumber = 'HRB 27814';
 			let plusD;
 
 			before(async () => {
@@ -43,12 +47,28 @@ describe("PlusD", () => {
 			});
 
 			describe('When the owner registers a consignor using its address and company registration number', () => {
+				let eventsBefore;
+				let eventsAfter;
+
 				before(async () => {
+					const event = plusD.ConsignorRegistered();
+					const getEvents = util.promisify(event.get.bind(event));
+
+					eventsBefore = await getEvents();
 					await plusD.registerConsignor(consignor, companyRegistrationNumber);
+					eventsAfter = await getEvents();
 				});
 
 				it('Then the consignor should be registered under the company registration number', async () => {
 					assert.strictEqual(await plusD.consignors(companyRegistrationNumber), consignor);
+				});
+
+				it("Then a CONSIGNOR_REGISTERED event should be emitted specifying the new consignor address and company registration number", async () => {
+					assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
+					const { consignor: eventConsignor, companyRegistrationNumber: eventCompanyRegistrationNumber } =
+						eventsAfter[eventsAfter.length - 1].args;
+					assert.strictEqual(eventConsignor, consignor);
+					assert.strictEqual(eventCompanyRegistrationNumber, normaliseBytes32(companyRegistrationNumber));
 				});
 			});
 		});
@@ -56,7 +76,7 @@ describe("PlusD", () => {
 
 	contract('Register carrier', ([owner, carrier]) => {
 		describe('Given the owner has initialised the contract', () => {
-			const companyRegistrationNumber = '27814';
+			const companyRegistrationNumber = 'HRB 27814';
 			let plusD;
 
 			before(async () => {
@@ -95,7 +115,7 @@ describe("PlusD", () => {
 
 	contract('Register insurer', ([owner, insurer]) => {
 		describe('Given the owner has initialised the contract', () => {
-			const companyRegistrationNumber = '27814';
+			const companyRegistrationNumber = 'HRB 27814';
 			let plusD;
 
 			before(async () => {

@@ -21,7 +21,10 @@ describe("Consignment", () => {
 			});
 
 			it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-				assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
+				assert.strictEqual(
+					parseInt(await consignment.state(), 10),
+					CARRIER_ASSIGNED,
+				);
 			});
 
 			it("Then the consignor should be specified", async () => {
@@ -87,7 +90,10 @@ describe("Consignment", () => {
 					});
 
 					it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-						assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
+						assert.strictEqual(
+							parseInt(await consignment.state(), 10),
+							CARRIER_ASSIGNED,
+						);
 					});
 
 					it("Then the carrier should be updated", async () => {
@@ -147,7 +153,10 @@ describe("Consignment", () => {
 					});
 
 					it("Then the contract should be in state INSURER_ASSIGNED", async () => {
-						assert.strictEqual(parseInt(await consignment.state(), 10), INSURER_ASSIGNED);
+						assert.strictEqual(
+							parseInt(await consignment.state(), 10),
+							INSURER_ASSIGNED,
+						);
 					});
 
 					it("Then the insurer should be specified", async () => {
@@ -214,11 +223,17 @@ describe("Consignment", () => {
 						});
 
 						it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-							assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
+							assert.strictEqual(
+								parseInt(await consignment.state(), 10),
+								CARRIER_ASSIGNED,
+							);
 						});
 
 						it("Then the carrier should be updated", async () => {
-							assert.strictEqual(await consignment.carrier(), carrierAlternative);
+							assert.strictEqual(
+								await consignment.carrier(),
+								carrierAlternative,
+							);
 						});
 
 						it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
@@ -284,11 +299,17 @@ describe("Consignment", () => {
 						});
 
 						it("Then the contract should be in state INSURER_ASSIGNED", async () => {
-							assert.strictEqual(parseInt(await consignment.state(), 10), INSURER_ASSIGNED);
+							assert.strictEqual(
+								parseInt(await consignment.state(), 10),
+								INSURER_ASSIGNED,
+							);
 						});
 
 						it("Then the insurer should be reassigned", async () => {
-							assert.strictEqual(await consignment.insurer(), insurerAlternative);
+							assert.strictEqual(
+								await consignment.insurer(),
+								insurerAlternative,
+							);
 						});
 
 						it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
@@ -354,7 +375,10 @@ describe("Consignment", () => {
 						});
 
 						it("Then the contract should be in state INSURANCE_VERIFIED", async () => {
-							assert.strictEqual(parseInt(await consignment.state(), 10), INSURANCE_VERIFIED);
+							assert.strictEqual(
+								parseInt(await consignment.state(), 10),
+								INSURANCE_VERIFIED,
+							);
 						});
 
 						it("Then an INSURANCE_VERIFIED event should be emitted", async () => {
@@ -422,11 +446,17 @@ describe("Consignment", () => {
 							});
 
 							it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
-								assert.strictEqual(parseInt(await consignment.state(), 10), CARRIER_ASSIGNED);
+								assert.strictEqual(
+									parseInt(await consignment.state(), 10),
+									CARRIER_ASSIGNED,
+								);
 							});
 
 							it("Then the carrier should be updated", async () => {
-								assert.strictEqual(await consignment.carrier(), carrierAlternative);
+								assert.strictEqual(
+									await consignment.carrier(),
+									carrierAlternative,
+								);
 							});
 
 							it("Then the insurer should be unassigned", async () => {
@@ -504,11 +534,17 @@ describe("Consignment", () => {
 							});
 
 							it("Then the contract should be in state INSURER_ASSIGNED", async () => {
-								assert.strictEqual(parseInt(await consignment.state(), 10), INSURER_ASSIGNED);
+								assert.strictEqual(
+									parseInt(await consignment.state(), 10),
+									INSURER_ASSIGNED,
+								);
 							});
 
 							it("Then the insurer should be reassigned", async () => {
-								assert.strictEqual(await consignment.insurer(), insurerAlternative);
+								assert.strictEqual(
+									await consignment.insurer(),
+									insurerAlternative,
+								);
 							});
 
 							it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {

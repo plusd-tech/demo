@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "Demo code for PlusD protocol",
   "main": "index.js",
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  },
   "directories": {
     "test": "test"
   },

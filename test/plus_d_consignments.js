@@ -9,6 +9,8 @@ const Consignment = artifacts.require("./Consignment.sol");
 
 describe("PlusDConsignments", () => {
 	const CONSIGNEE_ASSIGNED = 0x01;
+	const VERIFIER_ASSIGNED = 0x02;
+	const REQUIREMENTS_VERIFIED = 0x03
 	const requirements = "explosive goods";
 
 	describe("Given the owner has initialised the contract", () => {
@@ -137,85 +139,175 @@ describe("PlusDConsignments", () => {
 				});
 			});
 
-			contract(
-				"Verifier assignment",
-				([owner, consignor, consignee, verifier]) => {
-					describe("Given a consignor has been registered with company registration number 'HRB 27814'", () => {
-						const consignorCompanyRegistrationNumber = "HRB 27814";
+			contract("Verifier assignment", ([owner, consignor, consignee, verifier]) => {
+				describe("Given a consignor has been registered with company registration number 'HRB 27814'", () => {
+					const consignorCompanyRegistrationNumber = "HRB 27814";
+
+					before(async () => {
+						await plusDConsignments.registerConsignor(
+							consignor,
+							consignorCompanyRegistrationNumber,
+						);
+					});
+
+					describe("Given a consignee has been registered with company registration number 'HRB 28806'", () => {
+						const consigneeCompanyRegistrationNumber = "HRB 28806";
 
 						before(async () => {
-							await plusDConsignments.registerConsignor(
-								consignor,
-								consignorCompanyRegistrationNumber,
+							await plusDConsignments.registerConsignee(
+								consignee,
+								consigneeCompanyRegistrationNumber,
 							);
 						});
 
-						describe("Given a consignee has been registered with company registration number 'HRB 28806'", () => {
-							const consigneeCompanyRegistrationNumber = "HRB 28806";
+						describe("Given a verifier has been registered with company registration number 'HRB 30011'", () => {
+							const verifierCompanyRegistrationNumber = "HRB 30011";
 
 							before(async () => {
-								await plusDConsignments.registerConsignee(
-									consignee,
-									consigneeCompanyRegistrationNumber,
+								await plusDConsignments.registerVerifier(
+									verifier,
+									verifierCompanyRegistrationNumber,
 								);
 							});
 
-							describe("Given a verifier has been registered with company registration number 'HRB 30011'", () => {
-								const verifierCompanyRegistrationNumber = "HRB 30011";
+							describe('Given the consignor has created a consignment specifying the consignee and requirements "explosive goods"', () => {
+								let consignment;
 
 								before(async () => {
-									await plusDConsignments.registerVerifier(
-										verifier,
-										verifierCompanyRegistrationNumber,
+									await plusDConsignments.createConsignment(consignee, requirements, {
+										from: consignor,
+									});
+									consignment = new Consignment(
+										await plusDConsignments.consignments(consignor, 0),
 									);
 								});
 
-								describe('Given the consignor has created a consignment specifying the consignee and requirements "explosive goods"', () => {
-									let consignment;
+								describe("When someone other than the consignee assigns a verifier", () => {
+									let error;
 
 									before(async () => {
-										await plusDConsignments.createConsignment(
-											consignee,
-											requirements,
+										error = await attemptUnsuccessfulTransaction(
+											async () =>
+												await plusDConsignments.assignVerifier(
+													consignment.address,
+													verifier,
+													{
+														from: verifier,
+													},
+												),
+										);
+									});
+
+									it("Then the transaction should not be successful", async () => {
+										assert.match(error.message, /revert/);
+									});
+								});
+
+								describe("When the consignee assigns someone other than a registered verifier", () => {
+									let error;
+
+									before(async () => {
+										error = await attemptUnsuccessfulTransaction(
+											async () =>
+												await plusDConsignments.assignVerifier(
+													consignment.address,
+													consignee,
+													{
+														from: consignee,
+													},
+												),
+										);
+									});
+
+									it("Then the transaction should not be successful", async () => {
+										assert.match(error.message, /revert/);
+									});
+								});
+
+								describe('When the consignee assigns the verifier', () => {
+									before(async () => {
+										await plusDConsignments.assignVerifier(
+											consignment.address,
+											verifier,
 											{
-												from: consignor,
+												from: consignee,
 											},
 										);
-										consignment = new Consignment(
-											await plusDConsignments.consignments(consignor, 0),
+									});
+
+									it("Then the consignment should be in state VERIFIER_ASSIGNED", async () => {
+										assert.strictEqual(
+											parseInt(await consignment.state(), 10),
+											VERIFIER_ASSIGNED,
 										);
 									});
 
-									describe("When someone other than the consignee assigns a verifier", () => {
-										let error;
+									it("Then the consignment should specify the verifier", async () => {
+										assert.strictEqual(await consignment.verifier(), verifier);
+									});
+								});
+							});
+						});
+					});
+				});
+			});
 
-										before(async () => {
-											error = await attemptUnsuccessfulTransaction(
-												async () =>
-													await plusDConsignments.assignVerifier(
-														consignment.address,
-														verifier,
-														{
-															from: verifier,
-														},
-													),
-											);
-										});
+			contract("Requirements verification", ([owner, consignor, consignee, verifier]) => {
+				describe("Given a consignor has been registered with company registration number 'HRB 27814'", () => {
+					const consignorCompanyRegistrationNumber = "HRB 27814";
 
-										it("Then the transaction should not be successful", async () => {
-											assert.match(error.message, /revert/);
-										});
+					before(async () => {
+						await plusDConsignments.registerConsignor(
+							consignor,
+							consignorCompanyRegistrationNumber,
+						);
+					});
+
+					describe("Given a consignee has been registered with company registration number 'HRB 28806'", () => {
+						const consigneeCompanyRegistrationNumber = "HRB 28806";
+
+						before(async () => {
+							await plusDConsignments.registerConsignee(
+								consignee,
+								consigneeCompanyRegistrationNumber,
+							);
+						});
+
+						describe("Given a verifier has been registered with company registration number 'HRB 30011'", () => {
+							const verifierCompanyRegistrationNumber = "HRB 30011";
+
+							before(async () => {
+								await plusDConsignments.registerVerifier(
+									verifier,
+									verifierCompanyRegistrationNumber,
+								);
+							});
+
+							describe('Given the consignor has created a consignment specifying the consignee and requirements "explosive goods"', () => {
+								let consignment;
+
+								before(async () => {
+									await plusDConsignments.createConsignment(consignee, requirements, {
+										from: consignor,
+									});
+									consignment = new Consignment(
+										await plusDConsignments.consignments(consignor, 0),
+									);
+								});
+
+								describe('Given the consignee has assigned the verifier', () => {
+									before(async () => {
+										await plusDConsignments.assignVerifier(consignment.address, verifier, { from: consignee });
 									});
 
-									describe("When the consignee assigns someone other than a registered verifier", () => {
+									describe("When someone other than the verifier verifies requirements", () => {
 										let error;
 
 										before(async () => {
 											error = await attemptUnsuccessfulTransaction(
 												async () =>
-													await plusDConsignments.assignVerifier(
+													await plusDConsignments.verifyRequirements(
 														consignment.address,
-														consignee,
 														{
 															from: consignee,
 														},
@@ -228,24 +320,20 @@ describe("PlusDConsignments", () => {
 										});
 									});
 
-									describe("When the consignee assigns the verifier", () => {
-										let eventsBefore;
-										let eventsAfter;
-
+									describe('When the verifier verifies requirements', () => {
 										before(async () => {
-											await plusDConsignments.assignVerifier(
+											await plusDConsignments.verifyRequirements(
 												consignment.address,
-												verifier,
 												{
-													from: consignee,
+													from: verifier,
 												},
 											);
 										});
 
-										it("Then the consignment should specify the verifier", async () => {
+										it("Then the consignment should be in state REQUIREMENTS_VERIFIED", async () => {
 											assert.strictEqual(
-												await consignment.verifier(),
-												verifier,
+												parseInt(await consignment.state(), 10),
+												REQUIREMENTS_VERIFIED,
 											);
 										});
 									});
@@ -253,8 +341,8 @@ describe("PlusDConsignments", () => {
 							});
 						});
 					});
-				},
-			);
+				});
+			});
 		});
 	});
 });

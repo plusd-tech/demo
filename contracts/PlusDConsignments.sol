@@ -18,4 +18,9 @@ contract PlusDConsignments is PlusDRegistration {
 		Consignment consignment = Consignment(_consignment);
 		consignment.assignVerifier(_verifier);
 	}
+
+	function verifyRequirements(address _consignment) public onlyVerifier {
+		Consignment consignment = Consignment(_consignment);
+		consignment.verifyRequirements();
+	}
 }

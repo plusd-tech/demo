@@ -3,25 +3,24 @@ const { getEventsForTransaction, normaliseBytes32 } = require("./utils");
 const Consignment = artifacts.require("./Consignment.sol");
 
 describe("Consignment", () => {
-	const UNINITIALISED = 0x00;
 	const CONSIGNEE_ASSIGNED = 0x01;
 	const VERIFIER_ASSIGNED = 0x02;
 	const REQUIREMENTS_VERIFIED = 0x03;
 	const REQUIREMENTS_LENGTH = 32;
 	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-	contract(
-		"UNINITIALISED => CONSIGNEE_ASSIGNED",
-		([owner, consignor, consignee]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				const requirements = "explosive goods";
-				const normalisedRequirements = normaliseBytes32(requirements);
-				let consignment;
+	describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
+		const requirements = "explosive goods";
+		const normalisedRequirements = normaliseBytes32(requirements);
+		let consignment;
 
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
+		before(async () => {
+			consignment = await Consignment.deployed();
+		});
 
+		contract(
+			"UNINITIALISED => CONSIGNEE_ASSIGNED",
+			([owner, consignor, consignee]) => {
 				it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
 					assert.strictEqual(
 						parseInt(await consignment.state(), 10),
@@ -47,20 +46,12 @@ describe("Consignment", () => {
 						web3.toHex(normalisedRequirements),
 					);
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
-		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
+			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
 				describe("When the owner assigns a new consignee", () => {
 					let eventsBefore;
 					let eventsAfter;
@@ -96,20 +87,12 @@ describe("Consignment", () => {
 						assert.strictEqual(eventConsignee, consigneeAlternative);
 					});
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"CONSIGNEE_ASSIGNED => VERIFIER_ASSIGNED",
-		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"CONSIGNEE_ASSIGNED => VERIFIER_ASSIGNED",
+			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
 				describe("When the owner assigns the verifier", () => {
 					let eventsBefore;
 					let eventsAfter;
@@ -140,20 +123,12 @@ describe("Consignment", () => {
 						assert.strictEqual(eventVerifier, verifier);
 					});
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"VERIFIER_ASSIGNED => CONSIGNEE_ASSIGNED",
-		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"VERIFIER_ASSIGNED => CONSIGNEE_ASSIGNED",
+			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
 				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
@@ -197,27 +172,19 @@ describe("Consignment", () => {
 						});
 					});
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"VERIFIER_ASSIGNED => VERIFIER_ASSIGNED",
-		([
-			owner,
-			consignor,
-			consignee,
-			verifier,
-			consigneeAlternative,
-			verifierAlternative,
-		]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"VERIFIER_ASSIGNED => VERIFIER_ASSIGNED",
+			([
+				owner,
+				consignor,
+				consignee,
+				verifier,
+				consigneeAlternative,
+				verifierAlternative,
+			]) => {
 				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
@@ -261,20 +228,12 @@ describe("Consignment", () => {
 						});
 					});
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"VERIFIER_ASSIGNED => REQUIREMENTS_VERIFIED",
-		([owner, consignor, consignee, verifier]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"VERIFIER_ASSIGNED => REQUIREMENTS_VERIFIED",
+			([owner, consignor, consignee, verifier]) => {
 				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
@@ -308,20 +267,12 @@ describe("Consignment", () => {
 						});
 					});
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"REQUIREMENTS_VERIFIED => CONSIGNEE_ASSIGNED",
-		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"REQUIREMENTS_VERIFIED => CONSIGNEE_ASSIGNED",
+			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
 				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
@@ -377,27 +328,19 @@ describe("Consignment", () => {
 						});
 					});
 				});
-			});
-		},
-	);
+			},
+		);
 
-	contract(
-		"REQUIREMENTS_VERIFIED => VERIFIER_ASSIGNED",
-		([
-			owner,
-			consignor,
-			consignee,
-			verifier,
-			consigneeAlternative,
-			verifierAlternative,
-		]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
-				let consignment;
-
-				before(async () => {
-					consignment = await Consignment.deployed();
-				});
-
+		contract(
+			"REQUIREMENTS_VERIFIED => VERIFIER_ASSIGNED",
+			([
+				owner,
+				consignor,
+				consignee,
+				verifier,
+				consigneeAlternative,
+				verifierAlternative,
+			]) => {
 				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
@@ -449,7 +392,7 @@ describe("Consignment", () => {
 						});
 					});
 				});
-			});
-		},
-	);
+			},
+		);
+	});
 });

@@ -16,8 +16,18 @@ contract PlusDRegistration is Ownable {
 		_;
 	}
 
+	modifier onlyConsignee() {
+		require(consignees[msg.sender] != 0);
+		_;
+	}
+
 	modifier isConsignee(address _consignee) {
 		require(consignees[_consignee] != 0);
+		_;
+	}
+
+	modifier isVerifier(address _verifier) {
+		require(verifiers[_verifier] != 0);
 		_;
 	}
 

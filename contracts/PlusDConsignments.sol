@@ -13,4 +13,9 @@ contract PlusDConsignments is PlusDRegistration {
 		consignments[msg.sender].push(consignment);
 		emit ConsignmentCreated(consignment);
 	}
+
+	function assignVerifier(address _consignment, address _verifier) public onlyConsignee isVerifier(_verifier) {
+		Consignment consignment = Consignment(_consignment);
+		consignment.assignVerifier(_verifier);
+	}
 }

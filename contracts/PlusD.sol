@@ -14,5 +14,4 @@ contract PlusDConsignments is PlusDRegistration {
 	}
 }
 
-contract PlusD is PlusDConsignments {
-}
+contract PlusD is PlusDConsignments {}

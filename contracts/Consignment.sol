@@ -4,7 +4,7 @@ contract Consignment {
 	uint8 private UNINITIALISED = 0x00;
 	uint8 private CONSIGNEE_ASSIGNED = 0x01;
 	uint8 private VERIFIER_ASSIGNED = 0x02;
-	uint8 private INSURANCE_VERIFIED = 0x03;
+	uint8 private REQUIREMENTS_VERIFIED = 0x03;
 	uint8 public state = UNINITIALISED;
 
 	address public deployer;
@@ -16,7 +16,7 @@ contract Consignment {
 
 	event ConsigneeAssigned(address consignee);
 	event VerifierAssigned(address verifier);
-	event InsuranceVerified();
+	event RequirementsVerified();
 
 	constructor(address _consignor, address _consignee, bytes32 _requirements) public {
 		deployer = msg.sender;
@@ -57,8 +57,8 @@ contract Consignment {
 		emit VerifierAssigned(verifier);
 	}
 
-	function verifyInsurance() public onlyVerifier {
-		state = INSURANCE_VERIFIED;
-		emit InsuranceVerified();
+	function verifyRequirements() public onlyVerifier {
+		state = REQUIREMENTS_VERIFIED;
+		emit RequirementsVerified();
 	}
 }

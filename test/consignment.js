@@ -10,7 +10,7 @@ describe("Consignment", () => {
 	const UNINITIALISED = 0x00;
 	const CONSIGNEE_ASSIGNED = 0x01;
 	const VERIFIER_ASSIGNED = 0x02;
-	const INSURANCE_VERIFIED = 0x03;
+	const REQUIREMENTS_VERIFIED = 0x03;
 	const REQUIREMENTS_LENGTH = 32;
 	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -338,7 +338,7 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"VERIFIER_ASSIGNED => INSURANCE_VERIFIED",
+		"VERIFIER_ASSIGNED => REQUIREMENTS_VERIFIED",
 		([_, consignor, consignee, verifier]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
@@ -360,7 +360,7 @@ describe("Consignment", () => {
 						before(async () => {
 							error = await attemptUnsuccessfulTransaction(
 								async () =>
-									await consignment.verifyInsurance({
+									await consignment.verifyRequirements({
 										from: consignee,
 									}),
 							);
@@ -378,21 +378,21 @@ describe("Consignment", () => {
 						before(async () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
-									await consignment.verifyInsurance({
+									await consignment.verifyRequirements({
 										from: verifier,
 									}),
-								consignment.InsuranceVerified,
+								consignment.RequirementsVerified,
 							);
 						});
 
-						it("Then the contract should be in state INSURANCE_VERIFIED", async () => {
+						it("Then the contract should be in state REQUIREMENTS_VERIFIED", async () => {
 							assert.strictEqual(
 								parseInt(await consignment.state(), 10),
-								INSURANCE_VERIFIED,
+								REQUIREMENTS_VERIFIED,
 							);
 						});
 
-						it("Then an INSURANCE_VERIFIED event should be emitted", async () => {
+						it("Then an REQUIREMENTS_VERIFIED event should be emitted", async () => {
 							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 						});
 					});
@@ -402,7 +402,7 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURANCE_VERIFIED => CONSIGNEE_ASSIGNED",
+		"REQUIREMENTS_VERIFIED => CONSIGNEE_ASSIGNED",
 		([_, consignor, consignee, verifier, consigneeAlternative]) => {
 			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
@@ -420,7 +420,7 @@ describe("Consignment", () => {
 
 					describe("Given the verifier has verified the insurance", () => {
 						before(async () => {
-							await consignment.verifyInsurance({
+							await consignment.verifyRequirements({
 								from: verifier,
 							});
 						});
@@ -488,7 +488,7 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURANCE_VERIFIED => VERIFIER_ASSIGNED",
+		"REQUIREMENTS_VERIFIED => VERIFIER_ASSIGNED",
 		([
 			_,
 			consignor,
@@ -513,7 +513,7 @@ describe("Consignment", () => {
 
 					describe("Given the verifier has verified the insurance", () => {
 						before(async () => {
-							await consignment.verifyInsurance({
+							await consignment.verifyRequirements({
 								from: verifier,
 							});
 						});

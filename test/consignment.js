@@ -14,43 +14,46 @@ describe("Consignment", () => {
 	const REQUIREMENTS_LENGTH = 32;
 	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-	contract("UNINITIALISED => CONSIGNEE_ASSIGNED", ([_, consignor, consignee]) => {
-		describe('Given the contract has been initialised with the consignor, the consignee and insurance requirements "explosive goods"', () => {
-			const requirements = "explosive goods";
-			const normalisedRequirements = normaliseBytes32(requirements);
-			let consignment;
+	contract(
+		"UNINITIALISED => CONSIGNEE_ASSIGNED",
+		([_, consignor, consignee]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and insurance requirements "explosive goods"', () => {
+				const requirements = "explosive goods";
+				const normalisedRequirements = normaliseBytes32(requirements);
+				let consignment;
 
-			before(async () => {
-				consignment = await Consignment.deployed();
-			});
+				before(async () => {
+					consignment = await Consignment.deployed();
+				});
 
-			it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
-				assert.strictEqual(
-					parseInt(await consignment.state(), 10),
-					CONSIGNEE_ASSIGNED,
-				);
-			});
+				it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
+					assert.strictEqual(
+						parseInt(await consignment.state(), 10),
+						CONSIGNEE_ASSIGNED,
+					);
+				});
 
-			it("Then the consignor should be specified", async () => {
-				assert.strictEqual(await consignment.consignor(), consignor);
-			});
+				it("Then the consignor should be specified", async () => {
+					assert.strictEqual(await consignment.consignor(), consignor);
+				});
 
-			it("Then the consignee should be specified", async () => {
-				assert.strictEqual(await consignment.consignee(), consignee);
-			});
+				it("Then the consignee should be specified", async () => {
+					assert.strictEqual(await consignment.consignee(), consignee);
+				});
 
-			it("Then the verifier should not be specified", async () => {
-				assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
-			});
+				it("Then the verifier should not be specified", async () => {
+					assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
+				});
 
-			it("Then the insurance requirements should be specified", async () => {
-				assert.strictEqual(
-					await consignment.requirements(),
-					web3.toHex(normalisedRequirements),
-				);
+				it("Then the insurance requirements should be specified", async () => {
+					assert.strictEqual(
+						await consignment.requirements(),
+						web3.toHex(normalisedRequirements),
+					);
+				});
 			});
-		});
-	});
+		},
+	);
 
 	contract(
 		"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
@@ -101,7 +104,10 @@ describe("Consignment", () => {
 					});
 
 					it("Then the consignee should be updated", async () => {
-						assert.strictEqual(await consignment.consignee(), consigneeAlternative);
+						assert.strictEqual(
+							await consignment.consignee(),
+							consigneeAlternative,
+						);
 					});
 
 					it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the new consignee", async () => {

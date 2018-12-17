@@ -8,14 +8,14 @@ const Consignment = artifacts.require("./Consignment.sol");
 
 describe("Consignment", () => {
 	const UNINITIALISED = 0x00;
-	const CARRIER_ASSIGNED = 0x01;
-	const INSURER_ASSIGNED = 0x02;
+	const CONSIGNEE_ASSIGNED = 0x01;
+	const VERIFIER_ASSIGNED = 0x02;
 	const INSURANCE_VERIFIED = 0x03;
 	const REQUIREMENTS_LENGTH = 32;
 	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-	contract("UNINITIALISED => CARRIER_ASSIGNED", ([_, consignor, carrier]) => {
-		describe('Given the contract has been initialised with the consignor, the carrier and insurance requirements "explosive goods"', () => {
+	contract("UNINITIALISED => CONSIGNEE_ASSIGNED", ([_, consignor, consignee]) => {
+		describe('Given the contract has been initialised with the consignor, the consignee and insurance requirements "explosive goods"', () => {
 			const requirements = "explosive goods";
 			const normalisedRequirements = normaliseBytes32(requirements);
 			let consignment;
@@ -24,10 +24,10 @@ describe("Consignment", () => {
 				consignment = await Consignment.deployed();
 			});
 
-			it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
+			it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
 				assert.strictEqual(
 					parseInt(await consignment.state(), 10),
-					CARRIER_ASSIGNED,
+					CONSIGNEE_ASSIGNED,
 				);
 			});
 
@@ -35,12 +35,12 @@ describe("Consignment", () => {
 				assert.strictEqual(await consignment.consignor(), consignor);
 			});
 
-			it("Then the carrier should be specified", async () => {
-				assert.strictEqual(await consignment.carrier(), carrier);
+			it("Then the consignee should be specified", async () => {
+				assert.strictEqual(await consignment.consignee(), consignee);
 			});
 
-			it("Then the insurer should not be specified", async () => {
-				assert.strictEqual(await consignment.insurer(), ZERO_ADDRESS);
+			it("Then the verifier should not be specified", async () => {
+				assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
 			});
 
 			it("Then the insurance requirements should be specified", async () => {
@@ -53,23 +53,23 @@ describe("Consignment", () => {
 	});
 
 	contract(
-		"CARRIER_ASSIGNED => CARRIER_ASSIGNED",
-		([_, consignor, carrier, insurer, carrierAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+		"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
+		([_, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("When someone other than the consignor assigns a new carrier", () => {
+				describe("When someone other than the consignor assigns a new consignee", () => {
 					let error;
 
 					before(async () => {
 						error = await attemptUnsuccessfulTransaction(
 							async () =>
-								await consignment.assignCarrier(carrierAlternative, {
-									from: carrierAlternative,
+								await consignment.assignConsignee(consigneeAlternative, {
+									from: consigneeAlternative,
 								}),
 						);
 					});
@@ -79,36 +79,36 @@ describe("Consignment", () => {
 					});
 				});
 
-				describe("When the consignor assigns a new carrier", () => {
+				describe("When the consignor assigns a new consignee", () => {
 					let eventsBefore;
 					let eventsAfter;
 
 					before(async () => {
 						[eventsBefore, eventsAfter] = await getEventsForTransaction(
 							async () =>
-								await consignment.assignCarrier(carrierAlternative, {
+								await consignment.assignConsignee(consigneeAlternative, {
 									from: consignor,
 								}),
-							consignment.CarrierAssigned,
+							consignment.ConsigneeAssigned,
 						);
 					});
 
-					it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
+					it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
 						assert.strictEqual(
 							parseInt(await consignment.state(), 10),
-							CARRIER_ASSIGNED,
+							CONSIGNEE_ASSIGNED,
 						);
 					});
 
-					it("Then the carrier should be updated", async () => {
-						assert.strictEqual(await consignment.carrier(), carrierAlternative);
+					it("Then the consignee should be updated", async () => {
+						assert.strictEqual(await consignment.consignee(), consigneeAlternative);
 					});
 
-					it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
+					it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the new consignee", async () => {
 						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
-						const eventCarrier =
-							eventsAfter[eventsAfter.length - 1].args.carrier;
-						assert.strictEqual(eventCarrier, carrierAlternative);
+						const eventConsignee =
+							eventsAfter[eventsAfter.length - 1].args.consignee;
+						assert.strictEqual(eventConsignee, consigneeAlternative);
 					});
 				});
 			});
@@ -116,23 +116,23 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"CARRIER_ASSIGNED => INSURER_ASSIGNED",
-		([_, consignor, carrier, insurer, carrierAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+		"CONSIGNEE_ASSIGNED => VERIFIER_ASSIGNED",
+		([_, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("When someone other than the carrier assigns an insurer", () => {
+				describe("When someone other than the consignee assigns an verifier", () => {
 					let error;
 
 					before(async () => {
 						error = await attemptUnsuccessfulTransaction(
 							async () =>
-								await consignment.assignInsurer(insurer, {
-									from: insurer,
+								await consignment.assignVerifier(verifier, {
+									from: verifier,
 								}),
 						);
 					});
@@ -142,34 +142,34 @@ describe("Consignment", () => {
 					});
 				});
 
-				describe("When the carrier assigns the insurer", () => {
+				describe("When the consignee assigns the verifier", () => {
 					let eventsBefore;
 					let eventsAfter;
 
 					before(async () => {
 						[eventsBefore, eventsAfter] = await getEventsForTransaction(
 							async () =>
-								await consignment.assignInsurer(insurer, { from: carrier }),
-							consignment.InsurerAssigned,
+								await consignment.assignVerifier(verifier, { from: consignee }),
+							consignment.VerifierAssigned,
 						);
 					});
 
-					it("Then the contract should be in state INSURER_ASSIGNED", async () => {
+					it("Then the contract should be in state VERIFIER_ASSIGNED", async () => {
 						assert.strictEqual(
 							parseInt(await consignment.state(), 10),
-							INSURER_ASSIGNED,
+							VERIFIER_ASSIGNED,
 						);
 					});
 
-					it("Then the insurer should be specified", async () => {
-						assert.strictEqual(await consignment.insurer(), insurer);
+					it("Then the verifier should be specified", async () => {
+						assert.strictEqual(await consignment.verifier(), verifier);
 					});
 
-					it("Then an INSURER_ASSIGNED event should be emitted specifying the insurer", async () => {
+					it("Then an VERIFIER_ASSIGNED event should be emitted specifying the verifier", async () => {
 						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
-						const eventInsurer =
-							eventsAfter[eventsAfter.length - 1].args.insurer;
-						assert.strictEqual(eventInsurer, insurer);
+						const eventVerifier =
+							eventsAfter[eventsAfter.length - 1].args.verifier;
+						assert.strictEqual(eventVerifier, verifier);
 					});
 				});
 			});
@@ -177,30 +177,30 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURER_ASSIGNED => CARRIER_ASSIGNED",
-		([_, consignor, carrier, insurer, carrierAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+		"VERIFIER_ASSIGNED => CONSIGNEE_ASSIGNED",
+		([_, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the carrier has assigned the insurer", () => {
+				describe("Given the consignee has assigned the verifier", () => {
 					before(async () => {
-						await consignment.assignInsurer(insurer, {
-							from: carrier,
+						await consignment.assignVerifier(verifier, {
+							from: consignee,
 						});
 					});
 
-					describe("When someone other than the consignor assigns a new carrier", () => {
+					describe("When someone other than the consignor assigns a new consignee", () => {
 						let error;
 
 						before(async () => {
 							error = await attemptUnsuccessfulTransaction(
 								async () =>
-									await consignment.assignCarrier(carrierAlternative, {
-										from: carrierAlternative,
+									await consignment.assignConsignee(consigneeAlternative, {
+										from: consigneeAlternative,
 									}),
 							);
 						});
@@ -210,39 +210,39 @@ describe("Consignment", () => {
 						});
 					});
 
-					describe("When the consignor assigns a new carrier", () => {
+					describe("When the consignor assigns a new consignee", () => {
 						let eventsBefore;
 						let eventsAfter;
 
 						before(async () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
-									await consignment.assignCarrier(carrierAlternative, {
+									await consignment.assignConsignee(consigneeAlternative, {
 										from: consignor,
 									}),
-								consignment.CarrierAssigned,
+								consignment.ConsigneeAssigned,
 							);
 						});
 
-						it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
+						it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
 							assert.strictEqual(
 								parseInt(await consignment.state(), 10),
-								CARRIER_ASSIGNED,
+								CONSIGNEE_ASSIGNED,
 							);
 						});
 
-						it("Then the carrier should be updated", async () => {
+						it("Then the consignee should be updated", async () => {
 							assert.strictEqual(
-								await consignment.carrier(),
-								carrierAlternative,
+								await consignment.consignee(),
+								consigneeAlternative,
 							);
 						});
 
-						it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
+						it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the new consignee", async () => {
 							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
-							const eventCarrier =
-								eventsAfter[eventsAfter.length - 1].args.carrier;
-							assert.strictEqual(eventCarrier, carrierAlternative);
+							const eventConsignee =
+								eventsAfter[eventsAfter.length - 1].args.consignee;
+							assert.strictEqual(eventConsignee, consigneeAlternative);
 						});
 					});
 				});
@@ -251,37 +251,37 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURER_ASSIGNED => INSURER_ASSIGNED",
+		"VERIFIER_ASSIGNED => VERIFIER_ASSIGNED",
 		([
 			_,
 			consignor,
-			carrier,
-			insurer,
-			carrierAlternative,
-			insurerAlternative,
+			consignee,
+			verifier,
+			consigneeAlternative,
+			verifierAlternative,
 		]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the carrier has assigned the insurer", () => {
+				describe("Given the consignee has assigned the verifier", () => {
 					before(async () => {
-						await consignment.assignInsurer(insurer, {
-							from: carrier,
+						await consignment.assignVerifier(verifier, {
+							from: consignee,
 						});
 					});
 
-					describe("When someone other than the carrier assigns a new insurer", () => {
+					describe("When someone other than the consignee assigns a new verifier", () => {
 						let error;
 
 						before(async () => {
 							error = await attemptUnsuccessfulTransaction(
 								async () =>
-									await consignment.assignInsurer(insurerAlternative, {
-										from: insurer,
+									await consignment.assignVerifier(verifierAlternative, {
+										from: verifier,
 									}),
 							);
 						});
@@ -291,39 +291,39 @@ describe("Consignment", () => {
 						});
 					});
 
-					describe("When the carrier assigns a new insurer", () => {
+					describe("When the consignee assigns a new verifier", () => {
 						let eventsBefore;
 						let eventsAfter;
 
 						before(async () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
-									await consignment.assignInsurer(insurerAlternative, {
-										from: carrier,
+									await consignment.assignVerifier(verifierAlternative, {
+										from: consignee,
 									}),
-								consignment.InsurerAssigned,
+								consignment.VerifierAssigned,
 							);
 						});
 
-						it("Then the contract should be in state INSURER_ASSIGNED", async () => {
+						it("Then the contract should be in state VERIFIER_ASSIGNED", async () => {
 							assert.strictEqual(
 								parseInt(await consignment.state(), 10),
-								INSURER_ASSIGNED,
+								VERIFIER_ASSIGNED,
 							);
 						});
 
-						it("Then the insurer should be reassigned", async () => {
+						it("Then the verifier should be reassigned", async () => {
 							assert.strictEqual(
-								await consignment.insurer(),
-								insurerAlternative,
+								await consignment.verifier(),
+								verifierAlternative,
 							);
 						});
 
-						it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
+						it("Then an VERIFIER_ASSIGNED event should be emitted specifying the new verifier", async () => {
 							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
-							const eventInsurer =
-								eventsAfter[eventsAfter.length - 1].args.insurer;
-							assert.strictEqual(eventInsurer, insurerAlternative);
+							const eventVerifier =
+								eventsAfter[eventsAfter.length - 1].args.verifier;
+							assert.strictEqual(eventVerifier, verifierAlternative);
 						});
 					});
 				});
@@ -332,30 +332,30 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURER_ASSIGNED => INSURANCE_VERIFIED",
-		([_, consignor, carrier, insurer]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+		"VERIFIER_ASSIGNED => INSURANCE_VERIFIED",
+		([_, consignor, consignee, verifier]) => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the carrier has assigned the insurer", () => {
+				describe("Given the consignee has assigned the verifier", () => {
 					before(async () => {
-						await consignment.assignInsurer(insurer, {
-							from: carrier,
+						await consignment.assignVerifier(verifier, {
+							from: consignee,
 						});
 					});
 
-					describe("When someone other than the insurer verifies the insurance", () => {
+					describe("When someone other than the verifier verifies the insurance", () => {
 						let error;
 
 						before(async () => {
 							error = await attemptUnsuccessfulTransaction(
 								async () =>
 									await consignment.verifyInsurance({
-										from: carrier,
+										from: consignee,
 									}),
 							);
 						});
@@ -365,7 +365,7 @@ describe("Consignment", () => {
 						});
 					});
 
-					describe("When the insurer verifies insurance", () => {
+					describe("When the verifier verifies insurance", () => {
 						let eventsBefore;
 						let eventsAfter;
 
@@ -373,7 +373,7 @@ describe("Consignment", () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
 									await consignment.verifyInsurance({
-										from: insurer,
+										from: verifier,
 									}),
 								consignment.InsuranceVerified,
 							);
@@ -396,37 +396,37 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURANCE_VERIFIED => CARRIER_ASSIGNED",
-		([_, consignor, carrier, insurer, carrierAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+		"INSURANCE_VERIFIED => CONSIGNEE_ASSIGNED",
+		([_, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the carrier has assigned the insurer", () => {
+				describe("Given the consignee has assigned the verifier", () => {
 					before(async () => {
-						await consignment.assignInsurer(insurer, {
-							from: carrier,
+						await consignment.assignVerifier(verifier, {
+							from: consignee,
 						});
 					});
 
-					describe("Given the insurer has verified the insurance", () => {
+					describe("Given the verifier has verified the insurance", () => {
 						before(async () => {
 							await consignment.verifyInsurance({
-								from: insurer,
+								from: verifier,
 							});
 						});
 
-						describe("When someone other than the consignor assigns a new carrier", () => {
+						describe("When someone other than the consignor assigns a new consignee", () => {
 							let error;
 
 							before(async () => {
 								error = await attemptUnsuccessfulTransaction(
 									async () =>
-										await consignment.assignCarrier(carrierAlternative, {
-											from: carrierAlternative,
+										await consignment.assignConsignee(consigneeAlternative, {
+											from: consigneeAlternative,
 										}),
 								);
 							});
@@ -436,43 +436,43 @@ describe("Consignment", () => {
 							});
 						});
 
-						describe("When the consignor assigns a new carrier", () => {
+						describe("When the consignor assigns a new consignee", () => {
 							let eventsBefore;
 							let eventsAfter;
 
 							before(async () => {
 								[eventsBefore, eventsAfter] = await getEventsForTransaction(
 									async () =>
-										await consignment.assignCarrier(carrierAlternative, {
+										await consignment.assignConsignee(consigneeAlternative, {
 											from: consignor,
 										}),
-									consignment.CarrierAssigned,
+									consignment.ConsigneeAssigned,
 								);
 							});
 
-							it("Then the contract should be in state CARRIER_ASSIGNED", async () => {
+							it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
 								assert.strictEqual(
 									parseInt(await consignment.state(), 10),
-									CARRIER_ASSIGNED,
+									CONSIGNEE_ASSIGNED,
 								);
 							});
 
-							it("Then the carrier should be updated", async () => {
+							it("Then the consignee should be updated", async () => {
 								assert.strictEqual(
-									await consignment.carrier(),
-									carrierAlternative,
+									await consignment.consignee(),
+									consigneeAlternative,
 								);
 							});
 
-							it("Then the insurer should be unassigned", async () => {
-								assert.strictEqual(await consignment.insurer(), ZERO_ADDRESS);
+							it("Then the verifier should be unassigned", async () => {
+								assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
 							});
 
-							it("Then a CARRIER_ASSIGNED event should be emitted specifying the new carrier", async () => {
+							it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the new consignee", async () => {
 								assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
-								const eventCarrier =
-									eventsAfter[eventsAfter.length - 1].args.carrier;
-								assert.strictEqual(eventCarrier, carrierAlternative);
+								const eventConsignee =
+									eventsAfter[eventsAfter.length - 1].args.consignee;
+								assert.strictEqual(eventConsignee, consigneeAlternative);
 							});
 						});
 					});
@@ -482,44 +482,44 @@ describe("Consignment", () => {
 	);
 
 	contract(
-		"INSURANCE_VERIFIED => INSURER_ASSIGNED",
+		"INSURANCE_VERIFIED => VERIFIER_ASSIGNED",
 		([
 			_,
 			consignor,
-			carrier,
-			insurer,
-			carrierAlternative,
-			insurerAlternative,
+			consignee,
+			verifier,
+			consigneeAlternative,
+			verifierAlternative,
 		]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the carrier', () => {
+			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the carrier has assigned the insurer", () => {
+				describe("Given the consignee has assigned the verifier", () => {
 					before(async () => {
-						await consignment.assignInsurer(insurer, {
-							from: carrier,
+						await consignment.assignVerifier(verifier, {
+							from: consignee,
 						});
 					});
 
-					describe("Given the insurer has verified the insurance", () => {
+					describe("Given the verifier has verified the insurance", () => {
 						before(async () => {
 							await consignment.verifyInsurance({
-								from: insurer,
+								from: verifier,
 							});
 						});
 
-						describe("When someone other than the carrier assigns a new insurer", () => {
+						describe("When someone other than the consignee assigns a new verifier", () => {
 							let error;
 
 							before(async () => {
 								error = await attemptUnsuccessfulTransaction(
 									async () =>
-										await consignment.assignInsurer(insurerAlternative, {
-											from: insurer,
+										await consignment.assignVerifier(verifierAlternative, {
+											from: verifier,
 										}),
 								);
 							});
@@ -529,39 +529,39 @@ describe("Consignment", () => {
 							});
 						});
 
-						describe("When the carrier assigns a new insurer", () => {
+						describe("When the consignee assigns a new verifier", () => {
 							let eventsBefore;
 							let eventsAfter;
 
 							before(async () => {
 								[eventsBefore, eventsAfter] = await getEventsForTransaction(
 									async () =>
-										await consignment.assignInsurer(insurerAlternative, {
-											from: carrier,
+										await consignment.assignVerifier(verifierAlternative, {
+											from: consignee,
 										}),
-									consignment.InsurerAssigned,
+									consignment.VerifierAssigned,
 								);
 							});
 
-							it("Then the contract should be in state INSURER_ASSIGNED", async () => {
+							it("Then the contract should be in state VERIFIER_ASSIGNED", async () => {
 								assert.strictEqual(
 									parseInt(await consignment.state(), 10),
-									INSURER_ASSIGNED,
+									VERIFIER_ASSIGNED,
 								);
 							});
 
-							it("Then the insurer should be reassigned", async () => {
+							it("Then the verifier should be reassigned", async () => {
 								assert.strictEqual(
-									await consignment.insurer(),
-									insurerAlternative,
+									await consignment.verifier(),
+									verifierAlternative,
 								);
 							});
 
-							it("Then an INSURER_ASSIGNED event should be emitted specifying the new insurer", async () => {
+							it("Then an VERIFIER_ASSIGNED event should be emitted specifying the new verifier", async () => {
 								assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
-								const eventInsurer =
-									eventsAfter[eventsAfter.length - 1].args.insurer;
-								assert.strictEqual(eventInsurer, insurerAlternative);
+								const eventVerifier =
+									eventsAfter[eventsAfter.length - 1].args.verifier;
+								assert.strictEqual(eventVerifier, verifierAlternative);
 							});
 						});
 					});

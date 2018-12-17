@@ -8,7 +8,7 @@ const PlusD = artifacts.require("./PlusD.sol");
 const Consignment = artifacts.require("./Consignment.sol");
 
 describe("PlusD", () => {
-	const CARRIER_ASSIGNED = 0x01;
+	const CONSIGNEE_ASSIGNED = 0x01;
 
 	contract("Initialise contract", ([owner]) => {
 		describe("Given the owner has initialised the contract", () => {
@@ -92,7 +92,7 @@ describe("PlusD", () => {
 		});
 	});
 
-	contract("Register carrier", ([owner, carrier]) => {
+	contract("Register consignee", ([owner, consignee]) => {
 		describe("Given the owner has initialised the contract", () => {
 			const companyRegistrationNumber = "HRB 27814";
 			let plusD;
@@ -101,14 +101,14 @@ describe("PlusD", () => {
 				plusD = await PlusD.deployed();
 			});
 
-			describe("When someone other than the owner registers a carrier", () => {
+			describe("When someone other than the owner registers a consignee", () => {
 				let error;
 
 				before(async () => {
 					error = await attemptUnsuccessfulTransaction(
 						async () =>
-							await plusD.registerCarrier(carrier, companyRegistrationNumber, {
-								from: carrier,
+							await plusD.registerConsignee(consignee, companyRegistrationNumber, {
+								from: consignee,
 							}),
 					);
 				});
@@ -118,32 +118,32 @@ describe("PlusD", () => {
 				});
 			});
 
-			describe("When the owner registers a carrier using its address and company registration number", () => {
+			describe("When the owner registers a consignee using its address and company registration number", () => {
 				let eventsBefore;
 				let eventsAfter;
 
 				before(async () => {
 					[eventsBefore, eventsAfter] = await getEventsForTransaction(
 						async () =>
-							await plusD.registerCarrier(carrier, companyRegistrationNumber),
-						plusD.CarrierRegistered,
+							await plusD.registerConsignee(consignee, companyRegistrationNumber),
+						plusD.ConsigneeRegistered,
 					);
 				});
 
-				it("Then the carrier should be registered with the company registration number", async () => {
+				it("Then the consignee should be registered with the company registration number", async () => {
 					assert.strictEqual(
-						await plusD.carriers(carrier),
+						await plusD.consignees(consignee),
 						normaliseBytes32(companyRegistrationNumber),
 					);
 				});
 
-				it("Then a CARRIER_REGISTERED event should be emitted specifying the new carrier address and company registration number", async () => {
+				it("Then a CONSIGNEE_REGISTERED event should be emitted specifying the new consignee address and company registration number", async () => {
 					assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 					const {
-						carrier: eventCarrier,
+						consignee: eventConsignee,
 						companyRegistrationNumber: eventCompanyRegistrationNumber,
 					} = eventsAfter[eventsAfter.length - 1].args;
-					assert.strictEqual(eventCarrier, carrier);
+					assert.strictEqual(eventConsignee, consignee);
 					assert.strictEqual(
 						eventCompanyRegistrationNumber,
 						normaliseBytes32(companyRegistrationNumber),
@@ -153,7 +153,7 @@ describe("PlusD", () => {
 		});
 	});
 
-	contract("Register insurer", ([owner, insurer]) => {
+	contract("Register verifier", ([owner, verifier]) => {
 		describe("Given the owner has initialised the contract", () => {
 			const companyRegistrationNumber = "HRB 27814";
 			let plusD;
@@ -162,14 +162,14 @@ describe("PlusD", () => {
 				plusD = await PlusD.deployed();
 			});
 
-			describe("When someone other than the owner registers a insurer", () => {
+			describe("When someone other than the owner registers a verifier", () => {
 				let error;
 
 				before(async () => {
 					error = await attemptUnsuccessfulTransaction(
 						async () =>
-							await plusD.registerInsurer(insurer, companyRegistrationNumber, {
-								from: insurer,
+							await plusD.registerVerifier(verifier, companyRegistrationNumber, {
+								from: verifier,
 							}),
 					);
 				});
@@ -179,32 +179,32 @@ describe("PlusD", () => {
 				});
 			});
 
-			describe("When the owner registers a insurer using its address and company registration number", () => {
+			describe("When the owner registers a verifier using its address and company registration number", () => {
 				let eventsBefore;
 				let eventsAfter;
 
 				before(async () => {
 					[eventsBefore, eventsAfter] = await getEventsForTransaction(
 						async () =>
-							await plusD.registerInsurer(insurer, companyRegistrationNumber),
-						plusD.InsurerRegistered,
+							await plusD.registerVerifier(verifier, companyRegistrationNumber),
+						plusD.VerifierRegistered,
 					);
 				});
 
-				it("Then the insurer should be registered with the company registration number", async () => {
+				it("Then the verifier should be registered with the company registration number", async () => {
 					assert.strictEqual(
-						await plusD.insurers(insurer),
+						await plusD.verifiers(verifier),
 						normaliseBytes32(companyRegistrationNumber),
 					);
 				});
 
-				it("Then an INSURER_REGISTERED event should be emitted specifying the new carrier address and company registration number", async () => {
+				it("Then an VERIFIER_REGISTERED event should be emitted specifying the new consignee address and company registration number", async () => {
 					assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 					const {
-						insurer: eventInsurer,
+						verifier: eventVerifier,
 						companyRegistrationNumber: eventCompanyRegistrationNumber,
 					} = eventsAfter[eventsAfter.length - 1].args;
-					assert.strictEqual(eventInsurer, insurer);
+					assert.strictEqual(eventVerifier, verifier);
 					assert.strictEqual(
 						eventCompanyRegistrationNumber,
 						normaliseBytes32(companyRegistrationNumber),
@@ -214,7 +214,7 @@ describe("PlusD", () => {
 		});
 	});
 
-	contract("Consignment creation", ([owner, consignor, carrier]) => {
+	contract("Consignment creation", ([owner, consignor, consignee]) => {
 		const requirements = "explosive goods";
 		let plusD;
 
@@ -232,13 +232,13 @@ describe("PlusD", () => {
 				);
 			});
 
-			describe("Given a carrier has been registered with company registration number 'HRB 28806'", () => {
-				const carrierCompanyRegistrationNumber = "HRB 28806";
+			describe("Given a consignee has been registered with company registration number 'HRB 28806'", () => {
+				const consigneeCompanyRegistrationNumber = "HRB 28806";
 
 				before(async () => {
-					await plusD.registerCarrier(
-						carrier,
-						carrierCompanyRegistrationNumber,
+					await plusD.registerConsignee(
+						consignee,
+						consigneeCompanyRegistrationNumber,
 					);
 				});
 
@@ -248,8 +248,8 @@ describe("PlusD", () => {
 					before(async () => {
 						error = await attemptUnsuccessfulTransaction(
 							async () =>
-								await plusD.createConsignment(carrier, requirements, {
-									from: carrier,
+								await plusD.createConsignment(consignee, requirements, {
+									from: consignee,
 								}),
 						);
 					});
@@ -259,7 +259,7 @@ describe("PlusD", () => {
 					});
 				});
 
-				describe("When the consignor creates a consigment specifying the carrier and requirements 'explosive goods'", () => {
+				describe("When the consignor creates a consigment specifying the consignee and requirements 'explosive goods'", () => {
 					let consignment;
 					let eventsBefore;
 					let eventsAfter;
@@ -267,7 +267,7 @@ describe("PlusD", () => {
 					before(async () => {
 						[eventsBefore, eventsAfter] = await getEventsForTransaction(
 							async () => {
-								await plusD.createConsignment(carrier, requirements, {
+								await plusD.createConsignment(consignee, requirements, {
 									from: consignor,
 								});
 								consignment = new Consignment(
@@ -278,10 +278,10 @@ describe("PlusD", () => {
 						);
 					});
 
-					it("Then the consignment should be in state CARRIER_ASSIGNED", async () => {
+					it("Then the consignment should be in state CONSIGNEE_ASSIGNED", async () => {
 						assert.strictEqual(
 							parseInt(await consignment.state(), 10),
-							CARRIER_ASSIGNED,
+							CONSIGNEE_ASSIGNED,
 						);
 					});
 
@@ -289,8 +289,8 @@ describe("PlusD", () => {
 						assert.strictEqual(await consignment.consignor(), consignor);
 					});
 
-					it("Then the consignment should specify the carrier", async () => {
-						assert.strictEqual(await consignment.carrier(), carrier);
+					it("Then the consignment should specify the consignee", async () => {
+						assert.strictEqual(await consignment.consignee(), consignee);
 					});
 
 					it("Then the consignment should specify the requirements", async () => {

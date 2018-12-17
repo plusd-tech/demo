@@ -194,7 +194,10 @@ describe("PlusDRegistration", () => {
 				before(async () => {
 					[eventsBefore, eventsAfter] = await getEventsForTransaction(
 						async () =>
-							await plusDRegistration.registerVerifier(verifier, companyRegistrationNumber),
+							await plusDRegistration.registerVerifier(
+								verifier,
+								companyRegistrationNumber,
+							),
 						plusDRegistration.VerifierRegistered,
 					);
 				});

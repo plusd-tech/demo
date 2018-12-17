@@ -107,9 +107,13 @@ describe("PlusD", () => {
 				before(async () => {
 					error = await attemptUnsuccessfulTransaction(
 						async () =>
-							await plusD.registerConsignee(consignee, companyRegistrationNumber, {
-								from: consignee,
-							}),
+							await plusD.registerConsignee(
+								consignee,
+								companyRegistrationNumber,
+								{
+									from: consignee,
+								},
+							),
 					);
 				});
 
@@ -125,7 +129,10 @@ describe("PlusD", () => {
 				before(async () => {
 					[eventsBefore, eventsAfter] = await getEventsForTransaction(
 						async () =>
-							await plusD.registerConsignee(consignee, companyRegistrationNumber),
+							await plusD.registerConsignee(
+								consignee,
+								companyRegistrationNumber,
+							),
 						plusD.ConsigneeRegistered,
 					);
 				});
@@ -168,9 +175,13 @@ describe("PlusD", () => {
 				before(async () => {
 					error = await attemptUnsuccessfulTransaction(
 						async () =>
-							await plusD.registerVerifier(verifier, companyRegistrationNumber, {
-								from: verifier,
-							}),
+							await plusD.registerVerifier(
+								verifier,
+								companyRegistrationNumber,
+								{
+									from: verifier,
+								},
+							),
 					);
 				});
 
@@ -250,6 +261,23 @@ describe("PlusD", () => {
 							async () =>
 								await plusD.createConsignment(consignee, requirements, {
 									from: consignee,
+								}),
+						);
+					});
+
+					it("Then the transaction should not be successful", async () => {
+						assert.match(error.message, /revert/);
+					});
+				});
+
+				describe("When the consignor creates a consignment specifying someone other than a registered consignee", () => {
+					let error;
+
+					before(async () => {
+						error = await attemptUnsuccessfulTransaction(
+							async () =>
+								await plusD.createConsignment(consignor, requirements, {
+									from: consignor,
 								}),
 						);
 					});

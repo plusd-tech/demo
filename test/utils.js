@@ -9,7 +9,7 @@ module.exports.attemptUnsuccessfulTransaction = async fn => {
 };
 
 module.exports.getEventsForTransaction = async (fn, event) => {
-	const stream = event();
+	const stream = event({}, { fromBlock: 0 });
 	const getEvents = promisify(stream.get.bind(stream));
 
 	const eventsBefore = await getEvents();

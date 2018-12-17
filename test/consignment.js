@@ -1,5 +1,4 @@
 const {
-	attemptUnsuccessfulTransaction,
 	getEventsForTransaction,
 	normaliseBytes32,
 } = require("./utils");
@@ -16,8 +15,8 @@ describe("Consignment", () => {
 
 	contract(
 		"UNINITIALISED => CONSIGNEE_ASSIGNED",
-		([_, consignor, consignee]) => {
-			describe('Given the contract has been initialised with the consignor, the consignee and insurance requirements "explosive goods"', () => {
+		([owner, consignor, consignee]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				const requirements = "explosive goods";
 				const normalisedRequirements = normaliseBytes32(requirements);
 				let consignment;
@@ -45,7 +44,7 @@ describe("Consignment", () => {
 					assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
 				});
 
-				it("Then the insurance requirements should be specified", async () => {
+				it("Then the requirements should be specified", async () => {
 					assert.strictEqual(
 						await consignment.requirements(),
 						web3.toHex(normalisedRequirements),
@@ -57,32 +56,15 @@ describe("Consignment", () => {
 
 	contract(
 		"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
-		([_, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("When someone other than the consignor assigns a new consignee", () => {
-					let error;
-
-					before(async () => {
-						error = await attemptUnsuccessfulTransaction(
-							async () =>
-								await consignment.assignConsignee(consigneeAlternative, {
-									from: consigneeAlternative,
-								}),
-						);
-					});
-
-					it("Then the transaction should not be successful", async () => {
-						assert.match(error.message, /revert/);
-					});
-				});
-
-				describe("When the consignor assigns a new consignee", () => {
+				describe("When the owner assigns a new consignee", () => {
 					let eventsBefore;
 					let eventsAfter;
 
@@ -90,7 +72,7 @@ describe("Consignment", () => {
 						[eventsBefore, eventsAfter] = await getEventsForTransaction(
 							async () =>
 								await consignment.assignConsignee(consigneeAlternative, {
-									from: consignor,
+									from: owner,
 								}),
 							consignment.ConsigneeAssigned,
 						);
@@ -123,39 +105,22 @@ describe("Consignment", () => {
 
 	contract(
 		"CONSIGNEE_ASSIGNED => VERIFIER_ASSIGNED",
-		([_, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("When someone other than the consignee assigns an verifier", () => {
-					let error;
-
-					before(async () => {
-						error = await attemptUnsuccessfulTransaction(
-							async () =>
-								await consignment.assignVerifier(verifier, {
-									from: verifier,
-								}),
-						);
-					});
-
-					it("Then the transaction should not be successful", async () => {
-						assert.match(error.message, /revert/);
-					});
-				});
-
-				describe("When the consignee assigns the verifier", () => {
+				describe("When the owner assigns the verifier", () => {
 					let eventsBefore;
 					let eventsAfter;
 
 					before(async () => {
 						[eventsBefore, eventsAfter] = await getEventsForTransaction(
 							async () =>
-								await consignment.assignVerifier(verifier, { from: consignee }),
+								await consignment.assignVerifier(verifier, { from: owner }),
 							consignment.VerifierAssigned,
 						);
 					});
@@ -171,7 +136,7 @@ describe("Consignment", () => {
 						assert.strictEqual(await consignment.verifier(), verifier);
 					});
 
-					it("Then an VERIFIER_ASSIGNED event should be emitted specifying the verifier", async () => {
+					it("Then a VERIFIER_ASSIGNED event should be emitted specifying the verifier", async () => {
 						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 						const eventVerifier =
 							eventsAfter[eventsAfter.length - 1].args.verifier;
@@ -184,39 +149,22 @@ describe("Consignment", () => {
 
 	contract(
 		"VERIFIER_ASSIGNED => CONSIGNEE_ASSIGNED",
-		([_, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the consignee has assigned the verifier", () => {
+				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
-							from: consignee,
+							from: owner,
 						});
 					});
 
-					describe("When someone other than the consignor assigns a new consignee", () => {
-						let error;
-
-						before(async () => {
-							error = await attemptUnsuccessfulTransaction(
-								async () =>
-									await consignment.assignConsignee(consigneeAlternative, {
-										from: consigneeAlternative,
-									}),
-							);
-						});
-
-						it("Then the transaction should not be successful", async () => {
-							assert.match(error.message, /revert/);
-						});
-					});
-
-					describe("When the consignor assigns a new consignee", () => {
+					describe("When the owner assigns a new consignee", () => {
 						let eventsBefore;
 						let eventsAfter;
 
@@ -224,7 +172,7 @@ describe("Consignment", () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
 									await consignment.assignConsignee(consigneeAlternative, {
-										from: consignor,
+										from: owner,
 									}),
 								consignment.ConsigneeAssigned,
 							);
@@ -259,45 +207,28 @@ describe("Consignment", () => {
 	contract(
 		"VERIFIER_ASSIGNED => VERIFIER_ASSIGNED",
 		([
-			_,
+			owner,
 			consignor,
 			consignee,
 			verifier,
 			consigneeAlternative,
 			verifierAlternative,
 		]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the consignee has assigned the verifier", () => {
+				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
-							from: consignee,
+							from: owner,
 						});
 					});
 
-					describe("When someone other than the consignee assigns a new verifier", () => {
-						let error;
-
-						before(async () => {
-							error = await attemptUnsuccessfulTransaction(
-								async () =>
-									await consignment.assignVerifier(verifierAlternative, {
-										from: verifier,
-									}),
-							);
-						});
-
-						it("Then the transaction should not be successful", async () => {
-							assert.match(error.message, /revert/);
-						});
-					});
-
-					describe("When the consignee assigns a new verifier", () => {
+					describe("When the owner assigns a new verifier", () => {
 						let eventsBefore;
 						let eventsAfter;
 
@@ -305,7 +236,7 @@ describe("Consignment", () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
 									await consignment.assignVerifier(verifierAlternative, {
-										from: consignee,
+										from: owner,
 									}),
 								consignment.VerifierAssigned,
 							);
@@ -325,7 +256,7 @@ describe("Consignment", () => {
 							);
 						});
 
-						it("Then an VERIFIER_ASSIGNED event should be emitted specifying the new verifier", async () => {
+						it("Then a VERIFIER_ASSIGNED event should be emitted specifying the new verifier", async () => {
 							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 							const eventVerifier =
 								eventsAfter[eventsAfter.length - 1].args.verifier;
@@ -339,39 +270,22 @@ describe("Consignment", () => {
 
 	contract(
 		"VERIFIER_ASSIGNED => REQUIREMENTS_VERIFIED",
-		([_, consignor, consignee, verifier]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+		([owner, consignor, consignee, verifier]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the consignee has assigned the verifier", () => {
+				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
-							from: consignee,
+							from: owner,
 						});
 					});
 
-					describe("When someone other than the verifier verifies the insurance", () => {
-						let error;
-
-						before(async () => {
-							error = await attemptUnsuccessfulTransaction(
-								async () =>
-									await consignment.verifyRequirements({
-										from: consignee,
-									}),
-							);
-						});
-
-						it("Then the transaction should not be successful", async () => {
-							assert.match(error.message, /revert/);
-						});
-					});
-
-					describe("When the verifier verifies insurance", () => {
+					describe("When the owner verifies the requirements", () => {
 						let eventsBefore;
 						let eventsAfter;
 
@@ -379,7 +293,7 @@ describe("Consignment", () => {
 							[eventsBefore, eventsAfter] = await getEventsForTransaction(
 								async () =>
 									await consignment.verifyRequirements({
-										from: verifier,
+										from: owner,
 									}),
 								consignment.RequirementsVerified,
 							);
@@ -403,46 +317,29 @@ describe("Consignment", () => {
 
 	contract(
 		"REQUIREMENTS_VERIFIED => CONSIGNEE_ASSIGNED",
-		([_, consignor, consignee, verifier, consigneeAlternative]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+		([owner, consignor, consignee, verifier, consigneeAlternative]) => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the consignee has assigned the verifier", () => {
+				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
-							from: consignee,
+							from: owner,
 						});
 					});
 
-					describe("Given the verifier has verified the insurance", () => {
+					describe("Given the owner has verified the requirements", () => {
 						before(async () => {
 							await consignment.verifyRequirements({
-								from: verifier,
+								from: owner,
 							});
 						});
 
-						describe("When someone other than the consignor assigns a new consignee", () => {
-							let error;
-
-							before(async () => {
-								error = await attemptUnsuccessfulTransaction(
-									async () =>
-										await consignment.assignConsignee(consigneeAlternative, {
-											from: consigneeAlternative,
-										}),
-								);
-							});
-
-							it("Then the transaction should not be successful", async () => {
-								assert.match(error.message, /revert/);
-							});
-						});
-
-						describe("When the consignor assigns a new consignee", () => {
+						describe("When the owner assigns a new consignee", () => {
 							let eventsBefore;
 							let eventsAfter;
 
@@ -450,7 +347,7 @@ describe("Consignment", () => {
 								[eventsBefore, eventsAfter] = await getEventsForTransaction(
 									async () =>
 										await consignment.assignConsignee(consigneeAlternative, {
-											from: consignor,
+											from: owner,
 										}),
 									consignment.ConsigneeAssigned,
 								);
@@ -490,52 +387,35 @@ describe("Consignment", () => {
 	contract(
 		"REQUIREMENTS_VERIFIED => VERIFIER_ASSIGNED",
 		([
-			_,
+			owner,
 			consignor,
 			consignee,
 			verifier,
 			consigneeAlternative,
 			verifierAlternative,
 		]) => {
-			describe('Given the consignor has initialised the contract with insurance requirements "explosive goods" and assigned the consignee', () => {
+			describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
 				let consignment;
 
 				before(async () => {
 					consignment = await Consignment.deployed();
 				});
 
-				describe("Given the consignee has assigned the verifier", () => {
+				describe("Given the owner has assigned the verifier", () => {
 					before(async () => {
 						await consignment.assignVerifier(verifier, {
-							from: consignee,
+							from: owner,
 						});
 					});
 
-					describe("Given the verifier has verified the insurance", () => {
+					describe("Given the owner has verified the requirements", () => {
 						before(async () => {
 							await consignment.verifyRequirements({
-								from: verifier,
+								from: owner,
 							});
 						});
 
-						describe("When someone other than the consignee assigns a new verifier", () => {
-							let error;
-
-							before(async () => {
-								error = await attemptUnsuccessfulTransaction(
-									async () =>
-										await consignment.assignVerifier(verifierAlternative, {
-											from: verifier,
-										}),
-								);
-							});
-
-							it("Then the transaction should not be successful", async () => {
-								assert.match(error.message, /revert/);
-							});
-						});
-
-						describe("When the consignee assigns a new verifier", () => {
+						describe("When the owner assigns a new verifier", () => {
 							let eventsBefore;
 							let eventsAfter;
 
@@ -543,7 +423,7 @@ describe("Consignment", () => {
 								[eventsBefore, eventsAfter] = await getEventsForTransaction(
 									async () =>
 										await consignment.assignVerifier(verifierAlternative, {
-											from: consignee,
+											from: owner,
 										}),
 									consignment.VerifierAssigned,
 								);
@@ -563,7 +443,7 @@ describe("Consignment", () => {
 								);
 							});
 
-							it("Then an VERIFIER_ASSIGNED event should be emitted specifying the new verifier", async () => {
+							it("Then a VERIFIER_ASSIGNED event should be emitted specifying the new verifier", async () => {
 								assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 								const eventVerifier =
 									eventsAfter[eventsAfter.length - 1].args.verifier;

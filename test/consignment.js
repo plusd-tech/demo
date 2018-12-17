@@ -1,7 +1,4 @@
-const {
-	getEventsForTransaction,
-	normaliseBytes32,
-} = require("./utils");
+const { getEventsForTransaction, normaliseBytes32 } = require("./utils");
 
 const Consignment = artifacts.require("./Consignment.sol");
 

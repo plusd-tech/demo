@@ -206,7 +206,7 @@ describe("PlusDRegistration", () => {
 					);
 				});
 
-				it("Then an VERIFIER_REGISTERED event should be emitted specifying the new consignee address and company registration number", async () => {
+				it("Then a VERIFIER_REGISTERED event should be emitted specifying the new consignee address and company registration number", async () => {
 					assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 					const {
 						verifier: eventVerifier,

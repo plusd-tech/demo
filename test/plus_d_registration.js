@@ -7,29 +7,22 @@ const {
 const PlusDRegistration = artifacts.require("./PlusDRegistration.sol");
 
 describe("PlusDRegistration", () => {
-	contract("Initialise contract", ([owner]) => {
-		describe("Given the owner has initialised the contract", () => {
-			let plusDRegistration;
+	const companyRegistrationNumber = "HRB 27814";
 
-			before(async () => {
-				plusDRegistration = await PlusDRegistration.deployed();
-			});
+	describe("Given the owner has initialised the contract", () => {
+		let plusDRegistration;
 
+		before(async () => {
+			plusDRegistration = await PlusDRegistration.deployed();
+		});
+
+		contract("Contract initialisation", ([owner]) => {
 			it("Then the owner should be specified", async () => {
 				assert.strictEqual(await plusDRegistration.owner(), owner);
 			});
 		});
-	});
 
-	contract("Register consignor", ([owner, consignor]) => {
-		describe("Given the owner has initialised the contract", () => {
-			const companyRegistrationNumber = "HRB 27814";
-			let plusDRegistration;
-
-			before(async () => {
-				plusDRegistration = await PlusDRegistration.deployed();
-			});
-
+		contract("Register consignor", ([owner, consignor]) => {
 			describe("When someone other than the owner registers a consignor", () => {
 				let error;
 
@@ -87,17 +80,8 @@ describe("PlusDRegistration", () => {
 				});
 			});
 		});
-	});
 
-	contract("Register consignee", ([owner, consignee]) => {
-		describe("Given the owner has initialised the contract", () => {
-			const companyRegistrationNumber = "HRB 27814";
-			let plusDRegistration;
-
-			before(async () => {
-				plusDRegistration = await PlusDRegistration.deployed();
-			});
-
+		contract("Register consignee", ([owner, consignee]) => {
 			describe("When someone other than the owner registers a consignee", () => {
 				let error;
 
@@ -155,17 +139,8 @@ describe("PlusDRegistration", () => {
 				});
 			});
 		});
-	});
 
-	contract("Register verifier", ([owner, verifier]) => {
-		describe("Given the owner has initialised the contract", () => {
-			const companyRegistrationNumber = "HRB 27814";
-			let plusDRegistration;
-
-			before(async () => {
-				plusDRegistration = await PlusDRegistration.deployed();
-			});
-
+		contract("Register verifier", ([owner, verifier]) => {
 			describe("When someone other than the owner registers a verifier", () => {
 				let error;
 

@@ -3,13 +3,14 @@ const { getEventsForTransaction, normaliseBytes32 } = require("./utils");
 const Consignment = artifacts.require("./Consignment.sol");
 
 describe("Consignment", () => {
+	const CONSIGNMENT_CREATED = 0x00;
 	const CONSIGNEE_ASSIGNED = 0x01;
 	const VERIFIER_ASSIGNED = 0x02;
 	const REQUIREMENTS_VERIFIED = 0x03;
 	const REQUIREMENTS_LENGTH = 32;
 	const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-	describe('Given the contract has been initialised with the consignor, the consignee and requirements "explosive goods"', () => {
+	describe('Given the contract has been initialised with the consignor and requirements "explosive goods"', () => {
 		const requirements = "explosive goods";
 		const normalisedRequirements = normaliseBytes32(requirements);
 		let consignment;
@@ -19,12 +20,12 @@ describe("Consignment", () => {
 		});
 
 		contract(
-			"UNINITIALISED => CONSIGNEE_ASSIGNED",
+			"CONSIGNMENT_CREATED",
 			([owner, consignor, consignee]) => {
-				it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
+				it("Then the contract should be in state CONSIGNMENT_CREATED", async () => {
 					assert.strictEqual(
 						parseInt(await consignment.state(), 10),
-						CONSIGNEE_ASSIGNED,
+						CONSIGNMENT_CREATED,
 					);
 				});
 
@@ -32,8 +33,8 @@ describe("Consignment", () => {
 					assert.strictEqual(await consignment.consignor(), consignor);
 				});
 
-				it("Then the consignee should be specified", async () => {
-					assert.strictEqual(await consignment.consignee(), consignee);
+				it("Then the consignee should not be specified", async () => {
+					assert.strictEqual(await consignment.consignee(), ZERO_ADDRESS);
 				});
 
 				it("Then the verifier should not be specified", async () => {
@@ -50,16 +51,16 @@ describe("Consignment", () => {
 		);
 
 		contract(
-			"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
-			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
-				describe("When the owner assigns a new consignee", () => {
+			"CONSIGNMENT_CREATED => CONSIGNEE_ASSIGNED",
+			([owner, consignor, consignee, verifier]) => {
+				describe("When the owner assigns a consignee", () => {
 					let eventsBefore;
 					let eventsAfter;
 
 					before(async () => {
 						[eventsBefore, eventsAfter] = await getEventsForTransaction(
 							async () =>
-								await consignment.assignConsignee(consigneeAlternative, {
+								await consignment.assignConsignee(consignee, {
 									from: owner,
 								}),
 							consignment.ConsigneeAssigned,
@@ -73,18 +74,65 @@ describe("Consignment", () => {
 						);
 					});
 
-					it("Then the consignee should be updated", async () => {
+					it("Then the consignee should be specified", async () => {
 						assert.strictEqual(
 							await consignment.consignee(),
-							consigneeAlternative,
+							consignee,
 						);
 					});
 
-					it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the new consignee", async () => {
+					it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the consignee", async () => {
 						assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
 						const eventConsignee =
 							eventsAfter[eventsAfter.length - 1].args.consignee;
-						assert.strictEqual(eventConsignee, consigneeAlternative);
+						assert.strictEqual(eventConsignee, consignee);
+					});
+				});
+			},
+		);
+
+		contract(
+			"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
+			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
+				describe('Given the owner has assigned a consignee', () => {
+					before(async () => {
+						await consignment.assignConsignee(consigneeAlternative, { from: owner});
+					});
+
+					describe("When the owner assigns a new consignee", () => {
+						let eventsBefore;
+						let eventsAfter;
+
+						before(async () => {
+							[eventsBefore, eventsAfter] = await getEventsForTransaction(
+								async () =>
+									await consignment.assignConsignee(consigneeAlternative, {
+										from: owner,
+									}),
+								consignment.ConsigneeAssigned,
+							);
+						});
+
+						it("Then the contract should be in state CONSIGNEE_ASSIGNED", async () => {
+							assert.strictEqual(
+								parseInt(await consignment.state(), 10),
+								CONSIGNEE_ASSIGNED,
+							);
+						});
+
+						it("Then the consignee should be updated", async () => {
+							assert.strictEqual(
+								await consignment.consignee(),
+								consigneeAlternative,
+							);
+						});
+
+						it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the new consignee", async () => {
+							assert.strictEqual(eventsAfter.length, eventsBefore.length + 1);
+							const eventConsignee =
+								eventsAfter[eventsAfter.length - 1].args.consignee;
+							assert.strictEqual(eventConsignee, consigneeAlternative);
+						});
 					});
 				});
 			},

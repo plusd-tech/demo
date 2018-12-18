@@ -19,36 +19,33 @@ describe("Consignment", () => {
 			consignment = await Consignment.deployed();
 		});
 
-		contract(
-			"CONSIGNMENT_CREATED",
-			([owner, consignor, consignee]) => {
-				it("Then the contract should be in state CONSIGNMENT_CREATED", async () => {
-					assert.strictEqual(
-						parseInt(await consignment.state(), 10),
-						CONSIGNMENT_CREATED,
-					);
-				});
+		contract("CONSIGNMENT_CREATED", ([owner, consignor, consignee]) => {
+			it("Then the contract should be in state CONSIGNMENT_CREATED", async () => {
+				assert.strictEqual(
+					parseInt(await consignment.state(), 10),
+					CONSIGNMENT_CREATED,
+				);
+			});
 
-				it("Then the consignor should be specified", async () => {
-					assert.strictEqual(await consignment.consignor(), consignor);
-				});
+			it("Then the consignor should be specified", async () => {
+				assert.strictEqual(await consignment.consignor(), consignor);
+			});
 
-				it("Then the consignee should not be specified", async () => {
-					assert.strictEqual(await consignment.consignee(), ZERO_ADDRESS);
-				});
+			it("Then the consignee should not be specified", async () => {
+				assert.strictEqual(await consignment.consignee(), ZERO_ADDRESS);
+			});
 
-				it("Then the verifier should not be specified", async () => {
-					assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
-				});
+			it("Then the verifier should not be specified", async () => {
+				assert.strictEqual(await consignment.verifier(), ZERO_ADDRESS);
+			});
 
-				it("Then the requirements should be specified", async () => {
-					assert.strictEqual(
-						await consignment.requirements(),
-						web3.toHex(normalisedRequirements),
-					);
-				});
-			},
-		);
+			it("Then the requirements should be specified", async () => {
+				assert.strictEqual(
+					await consignment.requirements(),
+					web3.toHex(normalisedRequirements),
+				);
+			});
+		});
 
 		contract(
 			"CONSIGNMENT_CREATED => CONSIGNEE_ASSIGNED",
@@ -75,10 +72,7 @@ describe("Consignment", () => {
 					});
 
 					it("Then the consignee should be specified", async () => {
-						assert.strictEqual(
-							await consignment.consignee(),
-							consignee,
-						);
+						assert.strictEqual(await consignment.consignee(), consignee);
 					});
 
 					it("Then a CONSIGNEE_ASSIGNED event should be emitted specifying the consignee", async () => {
@@ -94,9 +88,11 @@ describe("Consignment", () => {
 		contract(
 			"CONSIGNEE_ASSIGNED => CONSIGNEE_ASSIGNED",
 			([owner, consignor, consignee, verifier, consigneeAlternative]) => {
-				describe('Given the owner has assigned a consignee', () => {
+				describe("Given the owner has assigned a consignee", () => {
 					before(async () => {
-						await consignment.assignConsignee(consigneeAlternative, { from: owner});
+						await consignment.assignConsignee(consigneeAlternative, {
+							from: owner,
+						});
 					});
 
 					describe("When the owner assigns a new consignee", () => {

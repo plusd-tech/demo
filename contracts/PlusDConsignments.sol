@@ -8,10 +8,15 @@ contract PlusDConsignments is PlusDRegistration {
 
 	event ConsignmentCreated(address consignment);
 
-	function createConsignment(address _consignee, bytes32 _requirements) public onlyConsignor isConsignee(_consignee) {
-		Consignment consignment = new Consignment(msg.sender, _consignee, _requirements);
+	function createConsignment(bytes32 _requirements) public onlyConsignor {
+		Consignment consignment = new Consignment(msg.sender, _requirements);
 		consignments[msg.sender].push(consignment);
 		emit ConsignmentCreated(consignment);
+	}
+
+	function assignConsignee(address _consignment, address _consignee) public onlyConsignor isConsignee(_consignee) {
+		Consignment consignment = Consignment(_consignment);
+		consignment.assignConsignee(_consignee);
 	}
 
 	function assignVerifier(address _consignment, address _verifier) public onlyConsignee isVerifier(_verifier) {
